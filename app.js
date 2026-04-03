@@ -1,3 +1,12 @@
+function loadVoices() {
+    const voices = speechSynthesis.getVoices();
+    if (voices.length > 0) {
+        console.log("Loaded voices:", voices);
+    }
+}
+speechSynthesis.onvoiceschanged = loadVoices;
+
+map = window.map = null;
 initializeMap([51.505, -0.09], 13);
 map.locate({ watch: true, setView: false, maxZoom: 16 });
 window.lastknownLocation = null;
@@ -17,15 +26,45 @@ map.on('locationfound', function(e) {
 
     if (!window.lastknownLocation) {
         // First update -> create the marker
-        userMarker = L.marker(e.latlng).addTo(map);
+        // userMarker = L.marker(e.latlng).addTo(map);
+
+        const headingIcon = L.divIcon({
+            className: "",
+            html: `<div id="heading-marker" class="my-location"></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        // Create the user marker
+        window.userMarker = L.marker(e.latlng, { icon: headingIcon }).addTo(map);
+
+        // Create the accuracy circle
         window.accuracyCircle = L.circle(e.latlng, {
             radius: e.accuracy,
             color: 'blue',
             fillOpacity: 0
         }).addTo(map);
+
+        window.addEventListener("deviceorientation", (event) => {
+            let heading;
+
+            if (event.webkitCompassHeading) {
+                // iOS gives true compass heading
+                heading = event.webkitCompassHeading;
+            } else {
+                // Android: alpha is relative to device orientation
+                heading = 360 - event.alpha;
+            }
+
+            const el = document.getElementById("heading-marker");
+            if (el) {
+                el.style.transform = `rotate(${heading}deg)`;
+            }
+        });
+
     } else {
         // All future updates -> move the same marker
-        userMarker.setLatLng(e.latlng);
+        window.userMarker.setLatLng(e.latlng);
         window.accuracyCircle.setLatLng(e.latlng).setRadius(e.accuracy);
     }
 
@@ -70,8 +109,14 @@ function navigate() {
     let { closestTrkpt, dist } = getClosestTrkpt(window.lastknownLocation, getGpxPointsAsArray());
 
     if (dist > window.trackThreshold) {
-    speak(`You are ${Math.round(dist)} meters from the next waypoint.`);
+        notification("Off route", `You are ${Math.round(dist)} meters from the route.`);
+        speak(`You are ${Math.round(dist)} meters from the next waypoint.`);
     }
+
+}
+
+function notify(title, message) {
+    //popup modal or browser notification with autohide after x seconds
 }
 
 
@@ -97,15 +142,38 @@ function getClosestTrkpt(currentPos, trkpts) {
 }                                                                     
 
 function speak(text) {
-    if(!('speechSynthesis' in window)) {
-        console.warn("Speech Synthesis not supported in this browser.");
-        return;
+    const msg = new SpeechSynthesisUtterance(text);
+
+    const voices = speechSynthesis.getVoices();
+    const chosenVoice = voices.find(v => v.name === "Microsoft Zira - English (United States)");
+
+    if (chosenVoice) {
+        msg.voice = chosenVoice;
+        console.log("Using voice:", chosenVoice.name);
+    } else {
+        console.warn("Zira not found, using default voice.");
     }
-    const synth = window.speechSynthesis;
-    const utterThis = new SpeechSynthesisUtterance(text);
-    if(!synth.speaking) {
-        synth.speak(utterThis);
-    }
+
+    speechSynthesis.speak(msg);
+
+    // if(!('speechSynthesis' in window)) {
+    //     console.warn("Speech Synthesis not supported in this browser.");
+    //     return;
+    // }
+    // const synth = window.speechSynthesis;
+    // const voices = speechSynthesis.getVoices();
+    // const zira = voices.find(v => v.name === "Microsoft Zira - English (United States)");
+
+    // if (zira) {
+    //     console.log("Using voice:", zira.name);
+    // } else {
+    //     console.warn("Zira not found, using default voice.");
+    // }
+
+    // const utterThis = new SpeechSynthesisUtterance(text);
+    // if(!synth.speaking) {
+    //     synth.speak(utterThis);
+    // }
 }
 
 function getGpxPointsAsArray() {
@@ -175,9 +243,11 @@ document.getElementById('gpx-upload').addEventListener('change', function (e) {
           weight: 2
         }).bindPopup(`Lat: ${pt.lat.toFixed(4)}<br>Lon: ${pt.lon.toFixed(4)}`).addTo(map);
       });
+      
     })
     .addTo(map);
   };
 
   reader.readAsText(file);
 });
+

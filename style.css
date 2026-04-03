@@ -1,0 +1,24 @@
+/* Outer circle */
+.my-location {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #4285f4;
+  border-radius: 50%;
+  background: white;
+  position: relative;
+}
+
+/* Direction arrow */
+.my-location::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #4285f4;
+  transform-origin: center bottom;
+}
