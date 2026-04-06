@@ -1,3 +1,6 @@
+var map;
+var deviceOrientationListener = null;
+
 function loadVoices() {
     const voices = speechSynthesis.getVoices();
     if (voices.length > 0) {
@@ -6,7 +9,6 @@ function loadVoices() {
 }
 speechSynthesis.onvoiceschanged = loadVoices;
 
-map = window.map = null;
 initializeMap([51.505, -0.09], 13);
 map.locate({ watch: true, setView: false, maxZoom: 16 });
 window.lastknownLocation = null;
@@ -20,14 +22,13 @@ function initializeMap(coords, zoom) {
   }).addTo(map);
 }
 
-
 map.on('locationfound', function(e) { 
     //console.log('Location found:', e.latlng, 'Accuracy:', e.accuracy);
+    window.lastKnownAccuracy = e.accuracy;
+    document.getElementById("accuracy-value").textContent = `${Math.round(e.accuracy)} meters`;
 
     if (!window.lastknownLocation) {
         // First update -> create the marker
-        // userMarker = L.marker(e.latlng).addTo(map);
-
         const headingIcon = L.divIcon({
             className: "",
             html: `<div id="heading-marker" class="my-location"></div>`,
@@ -42,25 +43,8 @@ map.on('locationfound', function(e) {
         window.accuracyCircle = L.circle(e.latlng, {
             radius: e.accuracy,
             color: 'blue',
-            fillOpacity: 0
+            fillOpacity: 0.1
         }).addTo(map);
-
-        window.addEventListener("deviceorientation", (event) => {
-            let heading;
-
-            if (event.webkitCompassHeading) {
-                // iOS gives true compass heading
-                heading = event.webkitCompassHeading;
-            } else {
-                // Android: alpha is relative to device orientation
-                heading = 360 - event.alpha;
-            }
-
-            const el = document.getElementById("heading-marker");
-            if (el) {
-                el.style.transform = `rotate(${heading}deg)`;
-            }
-        });
 
     } else {
         // All future updates -> move the same marker
@@ -108,8 +92,11 @@ function initNavigation() {
 function navigate() {
     let { closestTrkpt, dist } = getClosestTrkpt(window.lastknownLocation, getGpxPointsAsArray());
 
+    //report the gps accuracy
+    console.log("last known location:" , window.lastknownLocation);
+
     if (dist > window.trackThreshold) {
-        notification("Off route", `You are ${Math.round(dist)} meters from the route.`);
+        console.log("Off route", `You are ${Math.round(dist)} meters from the route.`);
         speak(`You are ${Math.round(dist)} meters from the next waypoint.`);
     }
 
@@ -189,13 +176,30 @@ function getGpxPointsAsArray() {
 
     //find the average distance between each point so we can use it as a threshold for accuracy durning navigation 
     let averageDistanceBetweenPoints = window.totalDistance / (window.trkpts.length - 1);
-    window.trackThreshold = averageDistanceBetweenPoints * 1.3; // Set threshold to 1.5 times the average distance
+    window.trackThreshold = (averageDistanceBetweenPoints / 2) +window.lastKnownAccuracy; // Set threshold to the average distance between points
     console.log("Track points loaded and cached. Average distance between points:", window.trackThreshold);
 
     return window.trkpts;
     
 }
 
+// Set up device orientation listener once
+window.addEventListener("deviceorientation", (event) => {
+    let heading;
+
+    if (event.webkitCompassHeading) {
+        // iOS gives true compass heading
+        heading = event.webkitCompassHeading;
+    } else {
+        // Android: alpha is relative to device orientation
+        heading = 360 - event.alpha;
+    }
+
+    const el = document.getElementById("heading-marker");
+    if (el) {
+        el.style.transform = `rotate(${heading}deg)`;
+    }
+});
 document.getElementById('navigate').addEventListener('click', initNavigation);
 document.getElementById('wake-lock').addEventListener('click', function(e) {
     if ('wakeLock' in navigator && !window.wakeLockActive) {
