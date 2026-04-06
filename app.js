@@ -197,6 +197,29 @@ function getGpxPointsAsArray() {
 }
 
 document.getElementById('navigate').addEventListener('click', initNavigation);
+document.getElementById('wake-lock').addEventListener('click', function(e) {
+    if ('wakeLock' in navigator && !window.wakeLockActive) {
+        navigator.wakeLock.request('screen').then(sentinel => {
+            window.wakeLockSentinel = sentinel;
+            e.target.innerHTML = "Disable Keep Awake";
+            window.wakeLockActive = true;
+        }).catch(err => {
+            console.error('Wake Lock failed:', err);
+            alert("Failed to activate Wake Lock.");
+        });
+    } else if (window.wakeLockActive) {
+        if (window.wakeLockSentinel) {
+            window.wakeLockSentinel.release().then(() => {
+                e.target.innerHTML = "Keep Awake";
+                window.wakeLockActive = false;
+            });
+        }
+    } 
+    else {
+        alert("Wake Lock API not supported in this browser.");
+    }
+});
+
 document.getElementById('gpx-upload').addEventListener('change', function (e) {
   const file = e.target.files[0];
   if (!file) return;
