@@ -1,3 +1,6 @@
+import 'leaflet';
+import 'leaflet-gpx';
+
 export class MapManager {
     constructor(containerId, gpxManager) {
         this.map = L.map(containerId).setView([51.505, -0.09], 13);

@@ -4,14 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>OSMnavigator</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""/>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-     <script src="https://unpkg.com/leaflet-gpx"></script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
     <input type="file" id="gpx-upload" accept=".gpx" />
@@ -19,6 +13,6 @@
     <button id="wake-lock">Keep Awake</button>
     <span id="gps-accuracy">GPS Accuracy: <span id="accuracy-value"></span></span>
     <div id="map" style="width: 100%; height: 90vh;"></div>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="src/app.js"></script>
 </body>
 </html>

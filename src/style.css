@@ -1,3 +1,5 @@
+@import url('../node_modules/leaflet/dist/leaflet.css');
+
 /* Outer circle */
 .my-location {
   width: 32px;
