@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "bootstrap": "^5.3.8",
     "leaflet": "^1.9.4",
     "leaflet-gpx": "^2.2.0"
   },
