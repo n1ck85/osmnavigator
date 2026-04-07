@@ -41,13 +41,8 @@ export class MapManager {
         .on('loaded', (e) => {
             const polylines = this.extractAllPolylines(e.target);
 
-            console.log("Extracted polylines:", polylines);
-
             // Pick the first polyline (usually the route)
             this.polyline = polylines[0];
-
-            console.log("Polyline:", this.polyline);
-            console.log("LatLngs:", this.polyline.getLatLngs());
             this.createVisibleMarkers(e);
 
         })
@@ -55,6 +50,11 @@ export class MapManager {
         console.log(this.currentGpxLayer);
     }
 
+    /**
+     * Recursively extract all polylines from a layer (handles nested layers)
+     * @param {L.Layer} layer - The layer to search for polylines
+     * @returns {L.Polyline[]} - An array of polylines found in the layer
+     */
     extractAllPolylines(layer) {
         let result = [];
 

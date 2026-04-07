@@ -5,6 +5,10 @@ export class DeviceManager {
     }
 
     startOrientationTracking() {
+        if (!this.checkDeviceOrientationSupport()) {
+            // return; DEBUG: Allow orientation tracking to be attempted even if permission is denied, for testing purposes
+        }  
+
         window.addEventListener("deviceorientation", (event) => {
             let heading;
 
@@ -13,7 +17,7 @@ export class DeviceManager {
                 heading = event.webkitCompassHeading;
             } else {
                 // Android: alpha is relative to device orientation
-                heading = 360 - event.alpha;
+                 heading = event.alpha;
             }
 
             const el = document.getElementById("heading-marker");
@@ -21,6 +25,25 @@ export class DeviceManager {
                 el.style.transform = `rotate(${heading}deg)`;
             }
         });
+    }
+
+    checkDeviceOrientationSupport() {
+        if (typeof DeviceOrientationEvent === 'undefined' || typeof DeviceOrientationEvent.requestPermission === 'undefined') {
+            alert("Device Orientation API not supported on this device.");
+            return false;
+        }   
+        DeviceOrientationEvent.requestPermission().then(permissionState => {
+            if (permissionState === 'granted') {
+                console.log("Device orientation permission granted.");  
+            } else {
+                alert("Permission to access device orientation denied.");
+            }
+        })
+        .catch(err => {
+            console.error("Error requesting device orientation permission:", err);
+            alert("Error requesting device orientation permission.");
+        });
+        return true;
     }
 
     toggleWakeLock(e) {
