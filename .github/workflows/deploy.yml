@@ -35,5 +35,5 @@ jobs:
       - uses: actions/configure-pages@v5   # ← REQUIRED
       - uses: actions/deploy-pages@v4       # ← REQUIRED
         with:
-          branch: staging
+          branch: main
           folder: dist
