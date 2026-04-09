@@ -40,7 +40,7 @@ export class DeviceManager {
             heading = event.webkitCompassHeading;
         } else {
             // Android: use absolute orientation to calculate heading
-            if (event.absolute && event.alpha !== null) {
+            if (event.alpha !== null) {
                 heading = 360 - event.alpha; // Convert to compass heading
             } else {
                 heading = null; // No valid heading available
@@ -62,7 +62,7 @@ export class DeviceManager {
                 this.wakeLockActive = true;
             }).catch(err => {
                 console.error('Wake Lock failed:', err);
-                alert("Failed to activate Wake Lock.");
+                this.supportLogger("Wake Lock", "Failed to activate Wake Lock.");
             });
         } else if (this.wakeLockActive && this.wakeLockSentinel) {
             this.wakeLockSentinel.release().then(() => {
@@ -70,7 +70,7 @@ export class DeviceManager {
                 this.wakeLockActive = false;
             });
         } else {
-            alert("Wake Lock API not supported in this browser.");
+            this.supportLogger("Wake Lock", "Wake Lock API not supported in this browser.");
         }
     }
 }
