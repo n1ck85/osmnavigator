@@ -12,6 +12,12 @@ export class MapManager {
         this.gpxManager = gpxManager;
 
         this.initializeTileLayer();
+
+        this.createButtonControl('navigate', 'topleft', '<i class="bi bi-signpost-split-fill"></i>');
+        this.createButtonControl('wake-lock', 'topleft', '<i class="bi bi-eye"></i></i>');
+        this.createButtonControl('gpx-upload', 'topleft', '<i class="bi bi-file-earmark-arrow-up"></i>', 'file');
+
+        this.createInfoBox('gps-accuracy', 'bottomleft', '<span>GPS Accuracy: <span id="accuracy-value"></span>');
     }
 
     setGpxManager(gpxManager) {
@@ -73,7 +79,6 @@ export class MapManager {
         return result;
     }
 
-
     createVisibleMarkers(gpxData) {
         this.fitBounds(gpxData.target.getBounds());
         this.totalDistance = gpxData.target.get_distance();
@@ -85,7 +90,8 @@ export class MapManager {
                 color: '#0044ff',
                 fillColor: '#0044ff',
                 fillOpacity: 0.7,
-                weight: 2
+                weight: 2,
+                className: 'track-point-marker'
             }).bindPopup(`Lat: ${pt.lat.toFixed(4)}<br>Lon: ${pt.lon.toFixed(4)}`).addTo(this.map);
         });
     }
@@ -107,6 +113,60 @@ export class MapManager {
             color: 'blue',
             fillOpacity: 0.1
         }).addTo(this.map);
+    }
+
+    createButtonControl(id, position, html, type) {
+        const ButtonControl = L.Control.extend({
+            options: {
+                position: position
+            },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                container.style.overflow = 'hidden';
+                const button = L.DomUtil.create('span', '', container);
+                button.id = id;
+                button.innerHTML = html;
+                button.style.cursor = 'pointer';
+                button.style.backgroundColor = 'white';
+                button.style.padding = '6px';
+                button.style.fontSize = '18px';
+                button.style.lineHeight = '30px';
+
+                if (type === 'file') {
+                    button.type = 'file';
+                    button.addEventListener('click', (e) => {console.log("Button clicked, opening file dialog...");
+                        const fileInput = document.getElementById(`${id}-input`);
+                        fileInput.click();
+                    });
+                }
+                else {
+                    button.href = '#';
+                }
+                return container;
+            }
+        });
+
+        this.map.addControl(new ButtonControl());
+    }
+
+    createInfoBox(id, position, content) {
+        const InfoControl = L.Control.extend({
+            options: {
+                position: position
+            },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                const info = L.DomUtil.create('div', '', container);
+                info.innerHTML = content;
+                info.style.backgroundColor = 'white';
+                info.style.padding = '1px 2px';
+                info.style.borderRadius = '4px';
+                info.id = id;
+                return container;
+            }
+        });
+
+        this.map.addControl(new InfoControl());
     }
 
     updateUserMarker(latlng, accuracy) {

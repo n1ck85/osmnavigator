@@ -1,3 +1,4 @@
+import 'bootstrap/js/dist/offcanvas.js';
 import { MapManager } from './classes/MapManager.js';
 import { GPXManager } from './classes/GPXManager.js';
 import { NavigationManager } from './classes/NavigationManager.js';
@@ -17,7 +18,7 @@ mapManager.setGpxManager(gpxManager);
 // Set up event listeners
 document.getElementById('navigate').addEventListener('click', () => navigationManager.startNavigation());
 document.getElementById('wake-lock').addEventListener('click', (e) => deviceManager.toggleWakeLock(e));
-document.getElementById('gpx-upload').addEventListener('change', (e) => gpxManager.loadGPX(e));
+document.getElementById('gpx-upload-input').addEventListener('change', (e) => gpxManager.loadGPX(e));
 
 // Start location tracking
 navigationManager.startLocationTracking();

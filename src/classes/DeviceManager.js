@@ -49,6 +49,28 @@ export class DeviceManager {
         }
 
         const el = document.getElementById("heading-marker");
+
+        //calibrate heading to north using gps location if available
+        navigator.geolocation.watchPosition(pos => { 
+            if (!pos.coords.heading) {
+                this.supportLogger("Debug", "GPS heading not available");
+            }
+            else {               
+                this.supportLogger("Debug", `GPS Heading: ${pos.coords.heading.toFixed(2)}°`);
+            }
+
+            const gpsHeading = pos.coords.heading; // degrees, 0–360
+            if (gpsHeading !== null && !isNaN(gpsHeading)) {
+                const deviceAlpha = currentAlpha; // from DeviceOrientationEvent
+                const offset = (gpsHeading - deviceAlpha + 360) % 360;
+                const heading = (deviceAlpha + offset + 360) % 360;
+                console.log(`GPS Heading: ${gpsHeading.toFixed(2)}°`);
+                //update the heading marker
+                el.style.transform = `rotate(${heading}deg)`;
+            }
+
+        });
+
         if (el) {
             el.style.transform = `rotate(${heading}deg)`;
         }
@@ -58,7 +80,7 @@ export class DeviceManager {
         if ('wakeLock' in navigator && !this.wakeLockActive) {
             navigator.wakeLock.request('screen').then(sentinel => {
                 this.wakeLockSentinel = sentinel;
-                e.target.innerHTML = "Disable Keep Awake";
+                e.target.parentElement.innerHTML = "<i class='bi bi-eye-slash'></i>";
                 this.wakeLockActive = true;
             }).catch(err => {
                 console.error('Wake Lock failed:', err);
@@ -66,7 +88,7 @@ export class DeviceManager {
             });
         } else if (this.wakeLockActive && this.wakeLockSentinel) {
             this.wakeLockSentinel.release().then(() => {
-                e.target.innerHTML = "Keep Awake";
+                e.target.parentElement.innerHTML = "<i class='bi bi-eye'></i>";
                 this.wakeLockActive = false;
             });
         } else {
