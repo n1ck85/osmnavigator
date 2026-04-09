@@ -2,48 +2,56 @@ export class DeviceManager {
     constructor() {
         this.wakeLockSentinel = null;
         this.wakeLockActive = false;
+        this.getHeading = this.getHeading.bind(this);
+    }
+
+    supportLogger(name,message) {
+        const logEl = document.getElementById("device-support-log");
+        if (logEl) {
+            const entry = document.createElement("div");
+            entry.textContent = `${name}: ${message}`;
+            //log without duplicates
+            if (!logEl.textContent.includes(entry.textContent)) {
+                logEl.appendChild(entry);
+            }
+        }
     }
 
     startOrientationTracking() {
-        if (!this.checkDeviceOrientationSupport()) {
-            // return; DEBUG: Allow orientation tracking to be attempted even if permission is denied, for testing purposes
-        }  
-
-        window.addEventListener("deviceorientation", (event) => {
-            let heading;
-
-            if (event.webkitCompassHeading) {
-                // iOS gives true compass heading
-                heading = event.webkitCompassHeading;
-            } else {
-                // Android: alpha is relative to device orientation
-                 heading = event.alpha;
-            }
-
-            const el = document.getElementById("heading-marker");
-            if (el) {
-                el.style.transform = `rotate(${heading}deg)`;
-            }
-        });
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // iOS 13+ Safari requires this call
+            DeviceOrientationEvent.requestPermission()
+                .then(response => {
+                    if (response === 'granted') {
+                        window.addEventListener('deviceorientation', this.getHeading);
+                    }
+                }).catch(console.error);
+        } else {
+            // Non-iOS 13+ or desktop: events fire automatically
+            window.addEventListener('deviceorientation', this.getHeading);
+        }
     }
 
-    checkDeviceOrientationSupport() {
-        if (typeof DeviceOrientationEvent === 'undefined' || typeof DeviceOrientationEvent.requestPermission === 'undefined') {
-            alert("Device Orientation API not supported on this device.");
-            return false;
-        }   
-        DeviceOrientationEvent.requestPermission().then(permissionState => {
-            if (permissionState === 'granted') {
-                console.log("Device orientation permission granted.");  
+    getHeading(event) {
+        let heading;
+
+        if (event.webkitCompassHeading) {
+            // iOS gives true compass heading
+            heading = event.webkitCompassHeading;
+        } else {
+            // Android: use absolute orientation to calculate heading
+            if (event.absolute && event.alpha !== null) {
+                heading = 360 - event.alpha; // Convert to compass heading
             } else {
-                alert("Permission to access device orientation denied.");
+                heading = null; // No valid heading available
+                this.supportLogger("Device Orientation", "Device orientation does not provide a valid heading.");
             }
-        })
-        .catch(err => {
-            console.error("Error requesting device orientation permission:", err);
-            alert("Error requesting device orientation permission.");
-        });
-        return true;
+        }
+
+        const el = document.getElementById("heading-marker");
+        if (el) {
+            el.style.transform = `rotate(${heading}deg)`;
+        }
     }
 
     toggleWakeLock(e) {
