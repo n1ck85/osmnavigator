@@ -10,15 +10,16 @@ const mapManager = new MapManager('map');
 const speechManager = new SpeechManager();
 const gpxManager = new GPXManager(mapManager);
 const deviceManager = new DeviceManager();
-const navigationManager = new NavigationManager(mapManager, gpxManager, speechManager);
+const navigationManager = new NavigationManager(mapManager, gpxManager, speechManager, deviceManager);
 
-// Pass gpxManager to mapManager as mapManager is initialized first
-mapManager.setGpxManager(gpxManager);
+// Pass managers to mapManager as mapManager is initialized first
+mapManager.setManagers([gpxManager, navigationManager]);
 
 // Set up event listeners
-document.getElementById('navigate').addEventListener('click', () => navigationManager.startNavigation());
-document.getElementById('wake-lock').addEventListener('click', (e) => deviceManager.toggleWakeLock(e));
 document.getElementById('gpx-upload-input').addEventListener('change', (e) => gpxManager.loadGPX(e));
+document.getElementById('navigate').addEventListener('click', () => navigationManager.startNavigation());
+document.getElementById('follow-user').addEventListener('click', (e) => navigationManager.toggleFollowUser(e));
+document.getElementById('wake-lock').addEventListener('click', (e) => deviceManager.toggleWakeLock(e));
 
 // Start location tracking
 navigationManager.startLocationTracking();

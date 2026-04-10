@@ -2,26 +2,32 @@ import 'leaflet';
 import 'leaflet-gpx';
 
 export class MapManager {
-    constructor(containerId, gpxManager) {
+    constructor(containerId) {
         this.map = L.map(containerId).setView([51.505, -0.09], 13);
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;
         this.currentGpxLayer = null;
         this.polyline = null;
-        this.gpxManager = gpxManager;
+        this.gpxManager = null;
 
         this.initializeTileLayer();
 
-        this.createButtonControl('navigate', 'topleft', '<i class="bi bi-signpost-split-fill"></i>');
-        this.createButtonControl('wake-lock', 'topleft', '<i class="bi bi-eye"></i></i>');
+        this.map.addEventListener('dragstart', () => {
+            this.navigationManager.stopFollowingUser();
+        });
+
         this.createButtonControl('gpx-upload', 'topleft', '<i class="bi bi-file-earmark-arrow-up"></i>', 'file');
+        this.createButtonControl('navigate', 'topleft', '<i class="bi bi-signpost-split-fill"></i>');
+        this.createButtonControl('follow-user', 'topleft', '<i class="bi bi-crosshair2"></i>');
+        this.createButtonControl('wake-lock', 'topleft', '<i class="bi bi-eye"></i></i>');
 
         this.createInfoBox('gps-accuracy', 'bottomleft', '<span>GPS Accuracy: <span id="accuracy-value"></span>');
     }
 
-    setGpxManager(gpxManager) {
-        this.gpxManager = gpxManager;
+    setManagers(managers) {
+        this.gpxManager = managers[0];
+        this.navigationManager = managers[1];
     }
 
     initializeTileLayer() {

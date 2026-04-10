@@ -11,8 +11,9 @@
 
  #map {
   width: 100%;
-  height: calc(100vh - 40px);
- }
+  /* height: calc(100vh - 40px); */
+  height: calc(100dvh - 40px);
+}
 
  #device-support-log {
   font-size: 0.8em;
