@@ -30,7 +30,7 @@ export class NavigationManager {
     }
 
     onLocationFound(e) { 
-        supportLogger("Location Update", `Location found: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} (accuracy: ${Math.round(e.accuracy)}m)`);
+        this.deviceManager.supportLogger("Location Update", `Location found: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} (accuracy: ${Math.round(e.accuracy)}m)`);
         if (!this.lastKnownLocation) {
             this.mapManager.createUserMarker(e.latlng);
             this.mapManager.createAccuracyCircle(e.latlng, e.accuracy);
@@ -46,7 +46,6 @@ export class NavigationManager {
         this.lastKnownAccuracy = e.accuracy;
         document.getElementById("accuracy-value").textContent = `${Math.round(e.accuracy)} meters`;
 
-        console.log(`Location found: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} (accuracy: ${Math.round(e.accuracy)}m)`);
         // Trigger navigation update if active
         if (this.isNavigating) {
             this.updateNavigation();
