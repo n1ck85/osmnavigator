@@ -18,7 +18,7 @@ export class MapManager {
         });
 
         this.createButtonControl('gpx-upload', 'topleft', '<i class="bi bi-file-earmark-arrow-up"></i>', 'file');
-        this.createButtonControl('navigate', 'topleft', '<i class="bi bi-signpost-split-fill"></i>');
+        this.createButtonControl('navigate', 'topleft', '<i class="bi bi-signpost-split"></i>');
         this.createButtonControl('follow-user', 'topleft', '<i class="bi bi-crosshair2"></i>');
         this.createButtonControl('wake-lock', 'topleft', '<i class="bi bi-eye"></i></i>');
 
@@ -191,7 +191,7 @@ export class MapManager {
         this.map.panTo(latlng);
     }
 
-    getClosestTrackPoint(currentPos, trkpts) { console.log("Finding closest track point to", currentPos);
+    getClosestTrackPoint(currentPos, trkpts) {
         let closest = null;
         let minDist = Infinity;
 
@@ -210,7 +210,7 @@ export class MapManager {
         return { closestTrkpt: closest, dist: minDist };
     }
 
-    getClosestPointOnPolyline(latlng) { console.log("Finding closest point on polyline to", latlng);
+    getClosestPointOnPolyline(latlng) {
         const targetPoint = this.map.latLngToLayerPoint(latlng);
         const latlngs = this.polyline.getLatLngs();
 

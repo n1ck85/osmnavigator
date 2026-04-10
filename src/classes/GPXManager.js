@@ -21,8 +21,14 @@ export class GPXManager {
         }
 
         this.trackPoints = null;
-
         this.mapManager.createPolyline(gpxData);
+
+        //switch the icon to filled version to indicate a route is loaded
+        const uploadBtnIcon = document.querySelector("#gpx-upload i");
+        if (uploadBtnIcon) {
+            uploadBtnIcon.classList.remove("bi-file-earmark-arrow-up");
+            uploadBtnIcon.classList.add("bi-file-earmark-arrow-up-fill");
+        }
     }
 
     getTrackPoints() {
@@ -37,9 +43,8 @@ export class GPXManager {
             lon: parseFloat(pt.getAttribute("lon"))
         }));
 
-        const averageDistanceBetweenPoints = this.totalDistance / (this.trackPoints.length - 1);
-        this.trackThreshold = (averageDistanceBetweenPoints / 2) + this.mapManager.lastKnownAccuracy;
-        console.log("Track points loaded. Threshold:", this.trackThreshold);
+        // const averageDistanceBetweenPoints = this.totalDistance / (this.trackPoints.length - 1);
+        // this.trackThreshold = (averageDistanceBetweenPoints / 2) + this.mapManager.lastKnownAccuracy;
 
         return this.trackPoints;
     }

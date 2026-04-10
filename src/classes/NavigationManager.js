@@ -30,7 +30,6 @@ export class NavigationManager {
     }
 
     onLocationFound(e) { 
-        this.deviceManager.supportLogger("Location Update", `Location found: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} (accuracy: ${Math.round(e.accuracy)}m)`);
         if (!this.lastKnownLocation) {
             this.mapManager.createUserMarker(e.latlng);
             this.mapManager.createAccuracyCircle(e.latlng, e.accuracy);
@@ -57,9 +56,19 @@ export class NavigationManager {
     }
 
     startNavigation() {
-        //this.mapManager.navigating = true;
+        if(this.isNavigating) {
+            this.speechManager.speak("Navigation stopped");
+            this.isNavigating = false;
+            // switch navigation btn icon back to outline version
+            const navigateBtnIcon = document.querySelector("#navigate i");
+            if (navigateBtnIcon) {
+                navigateBtnIcon.classList.remove("bi-signpost-split-fill");
+                navigateBtnIcon.classList.add("bi-signpost-split");
+            }
+            return;
+        }
+
         this.isNavigating = true;
-        // window.navigationManager = this;
 
         const trkpts = this.gpxManager.getTrackPoints();
         if (trkpts.length < 1) {
@@ -78,6 +87,12 @@ export class NavigationManager {
         }
 
         this.speechManager.speak("Navigation started");
+        // switch navigation btn icon to filled version
+        const navigateBtnIcon = document.querySelector("#navigate i");
+        if (navigateBtnIcon) {
+            navigateBtnIcon.classList.remove("bi-signpost-split");
+            navigateBtnIcon.classList.add("bi-signpost-split-fill");
+        }
         this.updateNavigation();
     }
 
