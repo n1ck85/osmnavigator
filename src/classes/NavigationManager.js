@@ -8,7 +8,9 @@ export class NavigationManager {
         this.followUser = true;
         this.lastKnownLocation = null;
         this.lastKnownAccuracy = null;
-        this.trackThreshold = 100;
+        this.trackThreshold = 50 + this.lastKnownAccuracy;
+        this.updateThrottle = 10000; // Minimum gap between navigation updates in milliseconds
+        this.lastUpdateTime = 0;
 
         this.setupLocationHandlers();
     }
@@ -68,25 +70,24 @@ export class NavigationManager {
             return;
         }
 
-        this.isNavigating = true;
-
+        //make sure we have a valid set of track points to navigate on
         const trkpts = this.gpxManager.getTrackPoints();
         if (trkpts.length < 1) {
             this.speechManager.speak("Route not found in the GPX file.");
             return;
         }
 
-        //const { closestTrkpt, dist } = this.mapManager.getClosestTrackPoint(this.lastKnownLocation, trkpts);
         const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
-
         if (distanceMeters > this.trackThreshold + this.lastKnownAccuracy) {
             this.isNavigating = false;
             console.log("Too far from route", `You are ${Math.round(distanceMeters)} meters from the route.`);
-            this.speechManager.speak(`Navigation not started. You are too far from the route. Route is ${Math.round(distanceMeters)} meters away.`);
+            this.speechManager.speak(`Navigation stopped. You are too far from the route. Route is ${Math.round(distanceMeters)} meters away.`);
             return;
         }
 
+        this.isNavigating = true;
         this.speechManager.speak("Navigation started");
+
         // switch navigation btn icon to filled version
         const navigateBtnIcon = document.querySelector("#navigate i");
         if (navigateBtnIcon) {
@@ -99,10 +100,12 @@ export class NavigationManager {
     updateNavigation() {
         if (!this.isNavigating) return;
 
-        const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
-        // const trkpts = this.getTrackPoints();
-        // const { closestTrkpt, dist } = this.mapManager.getClosestTrackPoint(this.lastKnownLocation, trkpts);
+        //make sure the updates are throttled to avoid excessive processing, updates and speech
+        const now = performance.now();
+        if (now - this.lastUpdateTime < this.updateThrottle) return;
+        this.lastUpdateTime = now;
 
+        const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
         if (distanceMeters > this.trackThreshold + this.lastKnownAccuracy) {
             console.log("Off route", `You are ${Math.round(distanceMeters)} meters from the route.`);
             this.speechManager.speak(`You are ${Math.round(distanceMeters)} meters from the route.`);

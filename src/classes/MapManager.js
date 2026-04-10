@@ -3,7 +3,7 @@ import 'leaflet-gpx';
 
 export class MapManager {
     constructor(containerId) {
-        this.map = L.map(containerId).setView([51.505, -0.09], 13);
+        this.map = L.map(containerId).setView([0, 0], 19);
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;

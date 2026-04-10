@@ -4,6 +4,7 @@ export class DeviceManager {
         this.wakeLockActive = false;
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
+        this.headingUpdateThrottle = 100; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
     }
 
@@ -38,7 +39,7 @@ export class DeviceManager {
         const now = performance.now();
 
         // throttle to 10Hz (100ms)
-        if (now - this.lastHeadingUpdate < 100) return;
+        if (now - this.lastHeadingUpdate < this.headingUpdateThrottle) return;
         this.lastHeadingUpdate = now;
 
         if (event.webkitCompassHeading) {
