@@ -43,7 +43,7 @@ export class DeviceManager {
                 window.addEventListener('deviceorientationabsolute', (e) => {
                     if(e.alpha !== null) {
                         //this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${e.alpha.toFixed(2)}°`);
-                        this.setHeading(e.alpha);
+                        this.setHeading((360 - e.alpha) % 360);
                     }
                     else {
                         this.supportLogger("Magnetic Heading", "Device orientation absolute alpha not available");
