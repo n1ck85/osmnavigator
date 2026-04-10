@@ -8,7 +8,7 @@ export class NavigationManager {
         this.followUser = true;
         this.lastKnownLocation = null;
         this.lastKnownAccuracy = null;
-        this.trackThreshold = 50;
+        this.trackThreshold = 100;
 
         this.setupLocationHandlers();
     }
@@ -67,11 +67,13 @@ export class NavigationManager {
             return;
         }
 
-        const { closestTrkpt, dist } = this.mapManager.getClosestTrackPoint(this.lastKnownLocation, trkpts);
-        if (dist > this.trackThreshold + this.lastKnownAccuracy) {
+        //const { closestTrkpt, dist } = this.mapManager.getClosestTrackPoint(this.lastKnownLocation, trkpts);
+        const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
+
+        if (distanceMeters > this.trackThreshold + this.lastKnownAccuracy) {
             this.isNavigating = false;
-            console.log("Too far from route", `You are ${Math.round(dist)} meters from the route.`);
-            this.speechManager.speak(`Navigation not started. You are to far from the route. Route is ${Math.round(dist)} meters away.`);
+            console.log("Too far from route", `You are ${Math.round(distanceMeters)} meters from the route.`);
+            this.speechManager.speak(`Navigation not started. You are to far from the route. Route is ${Math.round(distanceMeters)} meters away.`);
             return;
         }
 

@@ -191,7 +191,7 @@ export class MapManager {
         this.map.panTo(latlng);
     }
 
-    getClosestTrackPoint(currentPos, trkpts) {
+    getClosestTrackPoint(currentPos, trkpts) { console.log("Finding closest track point to", currentPos);
         let closest = null;
         let minDist = Infinity;
 
@@ -210,7 +210,7 @@ export class MapManager {
         return { closestTrkpt: closest, dist: minDist };
     }
 
-    getClosestPointOnPolyline(latlng) {
+    getClosestPointOnPolyline(latlng) { console.log("Finding closest point on polyline to", latlng);
         const targetPoint = this.map.latLngToLayerPoint(latlng);
         const latlngs = this.polyline.getLatLngs();
 
