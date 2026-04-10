@@ -82,7 +82,7 @@ export class NavigationManager {
         if (distanceMeters > this.trackThreshold + this.lastKnownAccuracy) {
             this.isNavigating = false;
             console.log("Too far from route", `You are ${Math.round(distanceMeters)} meters from the route.`);
-            this.speechManager.speak(`Navigation not started. You are to far from the route. Route is ${Math.round(distanceMeters)} meters away.`);
+            this.speechManager.speak(`Navigation not started. You are too far from the route. Route is ${Math.round(distanceMeters)} meters away.`);
             return;
         }
 

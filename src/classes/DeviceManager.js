@@ -65,23 +65,34 @@ export class DeviceManager {
         }
     }
 
-    toggleWakeLock(e) {
-        if ('wakeLock' in navigator && !this.wakeLockActive) {
-            navigator.wakeLock.request('screen').then(sentinel => {
-                this.wakeLockSentinel = sentinel;
-                e.target.parentElement.innerHTML = "<i class='bi bi-eye-slash'></i>";
-                this.wakeLockActive = true;
-            }).catch(err => {
-                console.error('Wake Lock failed:', err);
-                this.supportLogger("Wake Lock", "Failed to activate Wake Lock.");
-            });
-        } else if (this.wakeLockActive && this.wakeLockSentinel) {
-            this.wakeLockSentinel.release().then(() => {
-                e.target.parentElement.innerHTML = "<i class='bi bi-eye'></i>";
-                this.wakeLockActive = false;
-            });
+    toggleWakeLock(e) {console.log("Toggling Wake Lock...");
+        const icon = e.currentTarget.querySelector("i");
+
+        if ('wakeLock' in navigator) {
+            if (!this.wakeLockActive) {
+                navigator.wakeLock.request('screen').then(sentinel => {
+                    this.wakeLockSentinel = sentinel;
+                    this.wakeLockActive = true;
+                    if (icon) {
+                        icon.classList.remove("bi-eye");
+                        icon.classList.add("bi-eye-fill");
+                    }
+                }).catch(err => {
+                    console.error('Wake Lock failed:', err);
+                    this.supportLogger("Wake Lock", "Failed to activate Wake Lock.");
+                });
+            }
+            else {
+                this.wakeLockSentinel.release().then(() => {
+                    this.wakeLockActive = false;
+                    if (icon) {
+                        icon.classList.remove("bi-eye-fill");
+                        icon.classList.add("bi-eye");
+                    }
+                }); 
+            }
         } else {
-            this.supportLogger("Wake Lock", "Wake Lock API not supported in this browser.");
+            this.supportLogger("Wake Lock", "Wake Lock API not supported on this device.");
         }
     }
 }
