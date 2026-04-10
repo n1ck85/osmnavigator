@@ -35,9 +35,11 @@ export class DeviceManager {
     }
 
     getHeading(event) {
-        this.lastHeadingUpdate = performance.now();
-        if (performance.now() - this.lastHeadingUpdate < 100) return; // throttle to 10Hz
-        this.lastHeadingUpdate = performance.now();
+        const now = performance.now();
+
+        // throttle to 10Hz (100ms)
+        if (now - this.lastHeadingUpdate < 100) return;
+        this.lastHeadingUpdate = now;
 
         if (event.webkitCompassHeading) {
             // iOS gives true compass heading
