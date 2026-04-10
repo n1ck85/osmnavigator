@@ -2,7 +2,7 @@ export class DeviceManager {
     constructor() {
         this.wakeLockSentinel = null;
         this.wakeLockActive = false;
-        this.getHeading = this.getHeading.bind(this);
+        this.heading = 0;//this.getHeading.bind(this);
     }
 
     supportLogger(name,message) {
@@ -33,18 +33,16 @@ export class DeviceManager {
     }
 
     getHeading(event) {
-        let heading;
-
         if (event.webkitCompassHeading) {
             // iOS gives true compass heading
-            heading = event.webkitCompassHeading;
+            this.setHeading(event.webkitCompassHeading);
         } else {
             // Android: use absolute orientation to calculate heading
             if('ondeviceorientationabsolute' in window) {
                 window.addEventListener('deviceorientationabsolute', (e) => {
                     if(e.alpha !== null) {
                         this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${e.alpha.toFixed(2)}°`);
-                        heading = e.alpha;
+                        this.setHeading(e.alpha);
                     }
                     else {
                         this.supportLogger("Magnetic Heading", "Device orientation absolute alpha not available");
@@ -52,7 +50,10 @@ export class DeviceManager {
                 });
             }
         }
+    }
 
+    setHeading(heading) {
+        this.heading = heading;
         const el = document.getElementById("heading-marker");
 
         if (el) {
