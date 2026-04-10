@@ -4,6 +4,7 @@ export class DeviceManager {
         this.wakeLockActive = false;
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
+        this.lastHeadingUpdate = 0;
     }
 
     supportLogger(name,message) {
@@ -27,28 +28,28 @@ export class DeviceManager {
                         window.addEventListener('deviceorientation', this.getHeading);
                     }
                 }).catch(console.error);
-        } else {
+        } else if ('ondeviceorientationabsolute' in window) {
             // Non-iOS 13+ or desktop: events fire automatically
-            window.addEventListener('deviceorientation', this.getHeading);
+            window.addEventListener('deviceorientationabsolute', this.getHeading);
         }
     }
 
     getHeading(event) {
+        this.lastHeadingUpdate = performance.now();
+        if (now - this.lastHeadingUpdate < 100) return; // throttle to 10Hz
+        this.lastHeadingUpdate = now;
+
         if (event.webkitCompassHeading) {
             // iOS gives true compass heading
             this.setHeading(event.webkitCompassHeading);
         } else {
             // Android: use absolute orientation to calculate heading
-            if('ondeviceorientationabsolute' in window) {
-                window.addEventListener('deviceorientationabsolute', (e) => {
-                    if(e.alpha !== null) {
-                        //this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${e.alpha.toFixed(2)}°`);
-                        this.setHeading((360 - e.alpha) % 360);
-                    }
-                    else {
-                        this.supportLogger("Magnetic Heading", "Device orientation absolute alpha not available");
-                    }
-                });
+            if(event.alpha !== null) {
+                this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${e.alpha.toFixed(2)}°`);
+                this.setHeading((360 - event.alpha) % 360);
+            }
+            else {
+                this.supportLogger("Magnetic Heading", "Device orientation not available");
             }
         }
     }

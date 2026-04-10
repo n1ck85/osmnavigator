@@ -29,7 +29,8 @@ export class NavigationManager {
         });
     }
 
-    onLocationFound(e) {
+    onLocationFound(e) { 
+        supportLogger("Location Update", `Location found: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} (accuracy: ${Math.round(e.accuracy)}m)`);
         if (!this.lastKnownLocation) {
             this.mapManager.createUserMarker(e.latlng);
             this.mapManager.createAccuracyCircle(e.latlng, e.accuracy);
