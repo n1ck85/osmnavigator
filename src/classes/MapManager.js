@@ -59,7 +59,6 @@ export class MapManager {
 
         })
         .addTo(this.map);
-        console.log(this.currentGpxLayer);
     }
 
     /**
