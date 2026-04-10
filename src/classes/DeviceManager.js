@@ -47,7 +47,7 @@ export class DeviceManager {
         } else {
             // Android: use absolute orientation to calculate heading
             if(event.alpha !== null) {
-                this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${e.alpha.toFixed(2)}°`);
+                this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${event.alpha.toFixed(2)}°`);
                 this.setHeading((360 - event.alpha) % 360);
             }
             else {
