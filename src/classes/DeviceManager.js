@@ -40,36 +40,20 @@ export class DeviceManager {
             heading = event.webkitCompassHeading;
         } else {
             // Android: use absolute orientation to calculate heading
-            if (event.alpha !== null) {
-                heading = 360 - event.alpha; // Convert to compass heading
-            } else {
-                heading = null; // No valid heading available
-                this.supportLogger("Device Orientation", "Device orientation does not provide a valid heading.");
+            if('ondeviceorientationabsolute' in window) {
+                window.addEventListener('deviceorientationabsolute', (e) => {
+                    if(e.alpha !== null) {
+                        this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${e.alpha.toFixed(2)}°`);
+                        heading = e.alpha;
+                    }
+                    else {
+                        this.supportLogger("Magnetic Heading", "Device orientation absolute alpha not available");
+                    }
+                });
             }
         }
 
         const el = document.getElementById("heading-marker");
-
-        //calibrate heading to north using gps location if available
-        navigator.geolocation.watchPosition(pos => { 
-            if (!pos.coords.heading) {
-                this.supportLogger("Debug", "GPS heading not available");
-            }
-            else {               
-                this.supportLogger("Debug", `GPS Heading: ${pos.coords.heading.toFixed(2)}°`);
-            }
-
-            const gpsHeading = pos.coords.heading; // degrees, 0–360
-            if (gpsHeading !== null && !isNaN(gpsHeading)) {
-                const deviceAlpha = currentAlpha; // from DeviceOrientationEvent
-                const offset = (gpsHeading - deviceAlpha + 360) % 360;
-                const heading = (deviceAlpha + offset + 360) % 360;
-                console.log(`GPS Heading: ${gpsHeading.toFixed(2)}°`);
-                //update the heading marker
-                el.style.transform = `rotate(${heading}deg)`;
-            }
-
-        });
 
         if (el) {
             el.style.transform = `rotate(${heading}deg)`;
