@@ -7,7 +7,6 @@ export class MapManager {
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;
-        this.currentGpxLayer = null;
         this.polyline = null;
         this.gpxManager = null;
 
@@ -35,53 +34,6 @@ export class MapManager {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
-    }
-
-    createPolyline(gpxData) {
-        this.currentGpxLayer = new L.GPX(gpxData, {
-            async: true,
-            polyline_options: {
-                color: 'red',
-                weight: 4
-            },
-            marker_options: {
-                startIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-icon-start.png',
-                endIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-icon-end.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-shadow.png'
-            }
-        })
-        .on('loaded', (e) => {
-            const polylines = this.extractAllPolylines(e.target);
-
-            // Pick the first polyline (usually the route)
-            this.polyline = polylines[0];
-            this.createVisibleMarkers(e);
-
-        })
-        .addTo(this.map);
-    }
-
-    /**
-     * Recursively extract all polylines from a layer (handles nested layers)
-     * @param {L.Layer} layer - The layer to search for polylines
-     * @returns {L.Polyline[]} - An array of polylines found in the layer
-     */
-    extractAllPolylines(layer) {
-        let result = [];
-
-        // If this layer IS a polyline, store it
-        if (layer instanceof L.Polyline) {
-            result.push(layer);
-        }
-
-        // If this layer contains sublayers, search inside them
-        if (layer.getLayers) {
-            layer.getLayers().forEach(sub => {
-                result = result.concat(this.extractAllPolylines(sub));
-            });
-        }
-
-        return result;
     }
 
     createVisibleMarkers(gpxData) {
