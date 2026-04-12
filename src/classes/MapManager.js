@@ -36,23 +36,6 @@ export class MapManager {
         }).addTo(this.map);
     }
 
-    createVisibleMarkers(gpxData) {
-        this.fitBounds(gpxData.target.getBounds());
-        this.totalDistance = gpxData.target.get_distance();
-
-        const trkpts = this.gpxManager.getTrackPoints();
-        trkpts.forEach(pt => {
-            L.circleMarker([pt.lat, pt.lon], {
-                radius: 5,
-                color: '#0044ff',
-                fillColor: '#0044ff',
-                fillOpacity: 0.7,
-                weight: 2,
-                className: 'track-point-marker'
-            }).bindPopup(`Lat: ${pt.lat.toFixed(4)}<br>Lon: ${pt.lon.toFixed(4)}`).addTo(this.map);
-        });
-    }
-
     createUserMarker(latlng) {
         const headingIcon = L.divIcon({
             className: "",
@@ -91,7 +74,7 @@ export class MapManager {
 
                 if (type === 'file') {
                     button.type = 'file';
-                    button.addEventListener('click', (e) => {console.log("Button clicked, opening file dialog...");
+                    button.addEventListener('click', (e) => {
                         const fileInput = document.getElementById(`${id}-input`);
                         fileInput.click();
                     });
@@ -141,6 +124,10 @@ export class MapManager {
 
     panTo(latlng) {
         this.map.panTo(latlng);
+    }
+
+    clearLayer(layer){
+        this.map.removeLayer(layer);
     }
 
     getClosestTrackPoint(currentPos, trkpts) {
