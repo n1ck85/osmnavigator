@@ -151,7 +151,7 @@ export class MapManager {
 
     getClosestPointOnPolyline(latlng) {
         const targetPoint = this.map.latLngToLayerPoint(latlng);
-        const latlngs = this.polyline.getLatLngs();
+        const latlngs = this.gpxManager.trackPoints;
 
         let closest = null;
         let minDist = Infinity;

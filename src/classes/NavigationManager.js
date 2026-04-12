@@ -71,7 +71,7 @@ export class NavigationManager {
         }
 
         //make sure we have a valid set of track points to navigate on
-        const trkpts = this.gpxManager.getTrackPoints();
+        const trkpts = this.gpxManager.trackPoints;
         if (trkpts.length < 1) {
             this.speechManager.speak("Route not found in the GPX file.");
             return;
