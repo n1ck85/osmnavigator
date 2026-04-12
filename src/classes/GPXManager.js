@@ -31,11 +31,13 @@ export class GPXManager {
                 color: 'red',
                 weight: 4
             },
+            markers: {
+                startIcon: false,//'src/assets/icons/pin-icon-start.png',
+                endIcon: false,//'src/assets/icons/pin-icon-end.png',
+            },
             marker_options: {
-                className: 'gpx-marker',
-                startIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-icon-start.png',
-                endIconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-icon-end.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet-gpx/1.7.0/pin-shadow.png'
+                iconSize: [32, 32],
+                iconAnchor: [16, 32]
             }
         })
         .on('loaded', async (e) => {         
