@@ -9,8 +9,9 @@ export class NavigationManager {
         this.lastKnownLocation = null;
         this.lastKnownAccuracy = null;
         this.trackThreshold = 50 + this.lastKnownAccuracy;
-        this.updateThrottle = 10000; // Minimum gap between navigation updates in milliseconds
+        this.updateThrottle = 5000; // Minimum gap between navigation updates in milliseconds
         this.lastUpdateTime = 0;
+        this.offRoute = false;
 
         this.setupLocationHandlers();
     }
@@ -100,16 +101,33 @@ export class NavigationManager {
     updateNavigation() {
         if (!this.isNavigating) return;
 
-        //make sure the updates are throttled to avoid excessive processing, updates and speech
+        //make sure the updates are throttled to avoid excessive processing, updates
         const now = performance.now();
         if (now - this.lastUpdateTime < this.updateThrottle) return;
         this.lastUpdateTime = now;
-
-        const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
-        if (distanceMeters > this.trackThreshold + this.lastKnownAccuracy) {
-            console.log("Off route", `You are ${Math.round(distanceMeters)} meters from the route.`);
-            this.speechManager.speak(`You are ${Math.round(distanceMeters)} meters from the route.`);
+        
+        const distanceOffRoute = this.offRouteDetection();
+        if(distanceOffRoute > 0) {
+            this.offRoute = true;
+            console.log("Off route", `You are ${Math.round(distanceOffRoute)} meters away.`);
+            this.speechManager.speak(`Off route. You are ${Math.round(distanceOffRoute)} meters from the route.`);
         }
+        else
+        {
+            if(this.offRoute) { 
+                this.offRoute = false;
+                console.log("On route", `You are back on route.`);
+                this.speechManager.speak(`You are back on route.`);
+            }
+        }
+    }
+
+    offRouteDetection() {
+        const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
+        if (distanceMeters > this.trackThreshold + this.lastKnownAccuracy)
+            return distanceMeters;
+        else
+            return 0;
     }
 
     toggleFollowUser(e) {
