@@ -1,3 +1,7 @@
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+}
+
 import 'bootstrap/js/dist/offcanvas.js';
 import { MapManager } from './classes/MapManager.js';
 import { GPXManager } from './classes/GPXManager.js';

@@ -3,35 +3,51 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>OSMnavigator</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="stylesheet" href="src/style.css">
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <meta name="theme-color" content="#000000">
+
+    <!-- iOS PWA support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="./src/style.css">
 </head>
+
 <body>
     <div class="container-fluid p-0">
-        <nav class="navbar navbar-expand-lg bg-body-tertiary p-0">
+        <nav class="navbar bg-body-tertiary p-0">
             <div class="container-fluid">
                 <span class="navbar-brand font-weight-bold">OSMnavigator</span>
-                <button class="navbar-toggler border-0 px-0" 
-                        type="button" 
-                        data-bs-toggle="offcanvas" 
-                        data-bs-target="#offcanvasRight" 
-                        aria-controls="offcanvasRight" 
-                        aria-expanded="false" 
+                <button class="navbar-toggler border-0 px-0"
+                        type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasRight"
+                        aria-controls="offcanvasRight"
+                        aria-expanded="false"
                         aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
         </nav>
+
         <div id="map"></div>
     </div>
 
     <input type="file" id="gpx-upload-input" class="d-none" accept=".gpx" />
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasRightLabel">OSMnavigator</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
 
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">OSMnavigator</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body">
             Debug info:
