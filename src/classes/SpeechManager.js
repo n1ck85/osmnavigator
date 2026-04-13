@@ -3,7 +3,7 @@ export class SpeechManager {
         this.loadVoices();
         this.lastMsg = '';
         this.lastMsgTime = 0;
-        this.msgThrottle = 15000;
+        this.msgThrottle = 10000;
         speechSynthesis.onvoiceschanged = () => this.loadVoices();
     }
 

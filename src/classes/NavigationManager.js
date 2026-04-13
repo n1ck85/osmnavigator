@@ -108,9 +108,11 @@ export class NavigationManager {
         
         const distanceOffRoute = this.offRouteDetection();
         if(distanceOffRoute > 0) {
-            this.offRoute = true;
-            console.log("Off route", `You are ${Math.round(distanceOffRoute)} meters away.`);
-            this.speechManager.speak(`Off route. You are ${Math.round(distanceOffRoute)} meters from the route.`);
+            if(!this.offRoute) {
+                this.offRoute = true;
+                console.log("Off route", `You are ${Math.round(distanceOffRoute)} meters away.`);
+                this.speechManager.speak(`Off route. You are ${Math.round(distanceOffRoute)} meters from the route.`);
+            }
         }
         else
         {
