@@ -1,12 +1,9 @@
 const CACHE_NAME = "osmnav-cache-v1";
 
 const ASSETS = [
-  "./",
   "./index.html",
-  "./manifest.webmanifest",
   "./src/app.js",
   "./src/style.css",
-  // classes
   "./src/classes/MapManager.js",
   "./src/classes/GPXManager.js",
   "./src/classes/NavigationManager.js",
@@ -14,22 +11,30 @@ const ASSETS = [
   "./src/classes/SpeechManager.js"
 ];
 
-// --- Force immediate activation of new SW ---
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", () => self.clients.claim());
-
-// Install
+// --- Install ---
 self.addEventListener("install", event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
   );
 });
 
-// Fetch
+// --- Activate ---
+self.addEventListener("activate", event => {
+  self.clients.claim();
+});
+
+// --- Fetch ---
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(cached => {
-      return cached || fetch(event.request);
+      if (cached) return cached;
+
+      return fetch(event.request).catch(() => {
+        if (event.request.mode === "navigate") {
+          return caches.match("./index.html");
+        }
+      });
     })
   );
 });
