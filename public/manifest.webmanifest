@@ -1,6 +1,6 @@
 {
   "name": "OSMnavigator",
-  "short_name": "Navigator",
+  "short_name": "OSMNavigator",
   "start_url": "/osmnavigator/",
   "display": "standalone",
   "background_color": "#000000",

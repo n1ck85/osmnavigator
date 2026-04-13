@@ -1,14 +1,14 @@
 const CACHE_NAME = "osmnav-cache-v1";
 
 const ASSETS = [
-  "./index.html",
-  "./src/app.js",
-  "./src/style.css",
-  "./src/classes/MapManager.js",
-  "./src/classes/GPXManager.js",
-  "./src/classes/NavigationManager.js",
-  "./src/classes/DeviceManager.js",
-  "./src/classes/SpeechManager.js"
+  "./osmnavigator/index.html",
+  "./osmnavigator/src/app.js",
+  "./osmnavigator/src/style.css",
+  "./osmnavigator/src/classes/MapManager.js",
+  "./osmnavigator/src/classes/GPXManager.js",
+  "./osmnavigator/src/classes/NavigationManager.js",
+  "./osmnavigator/src/classes/DeviceManager.js",
+  "./osmnavigator/src/classes/SpeechManager.js"
 ];
 
 // --- Install ---
