@@ -15,6 +15,11 @@ export class GPXManager {
         const blobUrl = URL.createObjectURL(file);
         this.createPolyline(blobUrl);
 
+        //check for valid file
+        if(!this.trackPoints.length) {
+            alert('No route found in file');
+        }
+
         //switch the icon to filled version to indicate a route is loaded
         const uploadBtnIcon = document.querySelector("#gpx-upload i");
         if (uploadBtnIcon) {
@@ -32,12 +37,15 @@ export class GPXManager {
                 weight: 4
             },
             markers: {
-                startIcon: false,//'src/assets/icons/pin-icon-start.png',
-                endIcon: false,//'src/assets/icons/pin-icon-end.png',
+                startIcon: 'assets/icons/pin-icon-start.png',
+                endIcon: 'assets/icons/pin-icon-end.png',
             },
             marker_options: {
                 iconSize: [32, 32],
-                iconAnchor: [16, 32]
+                iconAnchor: [16, 32],
+                shadowUrl: 'assets/icons/pin-shadow.png',
+                shadowSize: [40, 20],
+                shadowAnchor: [12, 20]
             }
         })
         .on('loaded', async (e) => {         
