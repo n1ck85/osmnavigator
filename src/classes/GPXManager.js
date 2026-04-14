@@ -1,7 +1,7 @@
 export class GPXManager {
     constructor(mapManager) {
         this.mapManager = mapManager;
-        this.trackPoints = null;
+        this.trackPoints = [];
         this.trackPointMarkers = [];
         this.totalDistance = 0;
         this.currentGpxObject = null;
@@ -14,11 +14,6 @@ export class GPXManager {
 
         const blobUrl = URL.createObjectURL(file);
         this.createPolyline(blobUrl);
-
-        //check for valid file
-        if(!this.trackPoints.length) {
-            alert('No route found in file');
-        }
 
         //switch the icon to filled version to indicate a route is loaded
         const uploadBtnIcon = document.querySelector("#gpx-upload i");
@@ -34,7 +29,8 @@ export class GPXManager {
             async: true,
             polyline_options: {
                 color: 'red',
-                weight: 4
+                weight: 4,
+                className: 'route-line'
             },
             markers: {
                 startIcon: 'assets/icons/pin-icon-start.png',
@@ -53,8 +49,12 @@ export class GPXManager {
             const url = this.currentGpxObject._gpx;
             this.gpxXmlText = await fetch(url).then(r => r.text());
             this.trackPoints = this.parseTrackPoints(this.gpxXmlText);
+            //check for valid file
+            if(!this.trackPoints.length) {
+                alert('No route found in file');
+            }
             this.mapManager.map.fitBounds(e.target.getBounds());
-            this.createTrkptMarkers();
+            // this.createTrkptMarkers();
         })
         .addTo(this.mapManager.map);
     }

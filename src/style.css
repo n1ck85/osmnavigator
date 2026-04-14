@@ -9,16 +9,30 @@
     box-shadow: none !important;
 }
 
- #map {
+#map {
   width: 100%;
   /* height: calc(100vh - 40px); */
   height: calc(100dvh - 40px);
 }
 
- #device-support-log {
+#device-support-log {
   font-size: 0.8em;
   overflow-y: auto;
- }
+}
+
+.route-line {
+  stroke-dasharray: 10 10;      /* bar length + gap */
+  animation: route-move 2s linear infinite;
+}
+
+@keyframes route-move {
+    from {
+        stroke-dashoffset: 0;
+    }
+    to {
+        stroke-dashoffset: -20;   /* negative = forward direction */
+    }
+}
 
 /* Outer circle */
 .my-location {
