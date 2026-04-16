@@ -1,4 +1,5 @@
 export default class TileUtil {
+
   static latLngToTile(lat, lon, zoom) {
     const x = (lon + 180) / 360 * Math.pow(2, zoom);
     const y = (
@@ -51,6 +52,42 @@ export default class TileUtil {
         type: "CACHE_TILES",
         tiles: urls
       });
+
+      // Initiate the listeener but prevent duplicate listeners
+      if (!TileUtil._listenerAdded) {
+        TileUtil._listenerAdded = true;
+        TileUtil.listenForTileCacheResponse();
+      }
     }
   }
+
+  static listenForTileCacheResponse() {
+    navigator.serviceWorker.addEventListener("message", event => {
+      console.log('triggered');
+      if (event.data?.type === "TILE_CACHE_PROGRESS") {
+        const { percent, index, total } = event.data;
+        TileUtil.updateProgress(percent);
+      }
+    });
+  }
+
+  static updateProgress(percent) {
+    const parent = document.getElementById('progress');
+    if (!parent) return;
+
+    const bar = parent.querySelector('.progress-bar');
+    if (!bar) return;
+
+    if(percent === 100) {
+      setTimeout(function() { parent.style.display = 'none' }, 3000);
+    }
+    else {
+      parent.style.display = 'block';
+    }
+
+    bar.style.width = percent + '%';
+    bar.setAttribute('aria-valuenow', percent);
+    // bar.textContent = percent + '%';
+  }
+
 }

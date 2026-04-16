@@ -25,6 +25,14 @@
   animation: route-move 2s linear infinite;
 }
 
+#progress {
+    display: none;
+}
+.progress, .progress-bar {
+  border-radius: 0;
+  height: .5rem;
+}
+
 @keyframes route-move {
     from {
         stroke-dashoffset: 0;

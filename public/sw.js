@@ -109,15 +109,45 @@ self.addEventListener("message", async event => {
     const { tiles } = event.data;
     const cache = await caches.open(RUNTIME_CACHE);
 
+    let i = 0;
+
     for (const url of tiles) {
+      i++;
+
       try {
         const req = new Request(url, { mode: "no-cors" });
+
+        // 1. Check if tile already exists in cache
+        const existing = await cache.match(req);
+        if (existing) {
+          console.log(`skipped (already cached) ${i} of ${tiles.length}`);
+          continue;
+        }
+
+        // 2. Fetch tile
         const res = await fetch(req);
 
-        // Opaque responses are fine — cache them anyway
-        await cache.put(req, res.clone());
+        // 3. Cache opaque or OK responses
+        if (res.type === "opaque" || res.ok) {
+          await cache.put(req, res.clone());
+        }
 
-        console.log("cached:", url);
+        // Calculate progress
+        const percent = Math.round((i / tiles.length) * 100);
+
+        // Send progress back to the main thread
+        self.clients.matchAll().then(clients => {
+          clients.forEach(client => {
+            client.postMessage({
+              type: "TILE_CACHE_PROGRESS",
+              index: i,
+              total: tiles.length,
+              percent
+            });
+          });
+        });
+
+        console.log(`cached ${i} of ${tiles.length} tiles`);
       } catch (err) {
         console.warn("Tile fetch failed:", url, err);
       }
