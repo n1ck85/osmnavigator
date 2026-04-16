@@ -4,15 +4,16 @@ import TileUtil from './utils/TileUtil.js';
 
 export class MapManager {
     constructor(containerId) {
-        this.tileLayerUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-        this.map = L.map(containerId).setView([0, 0], 19);
+        this.tileLayerUrl = 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=MCXdEISVVJdUnViMkSeS';
+        this.map = null;
+        this.containerId = 'map';
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;
         this.polyline = null;
         this.gpxManager = null;
 
-        this.initializeTileLayer();
+       this.initializeMap();
 
         this.map.addEventListener('dragstart', () => {
             this.navigationManager.stopFollowingUser();
@@ -31,9 +32,12 @@ export class MapManager {
         this.navigationManager = managers[1];
     }
 
-    initializeTileLayer() {
+    initializeMap() {
+        this.map = L.map(this.containerId).setView([0, 0], 17);
+
         L.tileLayer(this.tileLayerUrl, {
-            maxZoom: 19,
+            maxZoom: 17,
+            minZoom: 10,
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
     }
@@ -179,8 +183,8 @@ export class MapManager {
     }
 
     cacheTilesForBounds(bounds) { 
-        const minZoom = 12;//this.map.getMinZoom();
-        const maxZoom = 16//this.map.getMaxZoom();
+        const minZoom = this.map.getMinZoom();
+        const maxZoom = this.map.getMaxZoom();
         console.log(minZoom,maxZoom);
         const template = this.tileLayerUrl; 
 
