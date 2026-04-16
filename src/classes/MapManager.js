@@ -1,8 +1,10 @@
 import 'leaflet';
 import 'leaflet-gpx';
+import TileUtil from './utils/TileUtil.js';
 
 export class MapManager {
     constructor(containerId) {
+        this.tileLayerUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
         this.map = L.map(containerId).setView([0, 0], 19);
         this.userMarker = null;
         this.accuracyCircle = null;
@@ -30,7 +32,7 @@ export class MapManager {
     }
 
     initializeTileLayer() {
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        L.tileLayer(this.tileLayerUrl, {
             maxZoom: 19,
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
@@ -174,6 +176,18 @@ export class MapManager {
             // distancePixels: minDist,
             distanceMeters: latlng.distanceTo(this.map.layerPointToLatLng(closest))
         };
-
     }
+
+    cacheTilesForBounds(bounds) { 
+        const minZoom = 12;//this.map.getMinZoom();
+        const maxZoom = 16//this.map.getMaxZoom();
+        console.log(minZoom,maxZoom);
+        const template = this.tileLayerUrl; 
+
+        const urls = TileUtil.generateForAllZooms(bounds, minZoom, maxZoom, template);
+        
+        console.log('caching urls');
+        TileUtil.sendToServiceWorker(urls);
+    }
+
 }

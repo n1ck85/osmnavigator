@@ -1,6 +1,10 @@
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+if ('serviceWorker' in navigator) {
+  //navigator.serviceWorker.register('/osmnavigator/sw.js');
+      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
+
 }
+
+import './style.css';
 
 import 'bootstrap/js/dist/offcanvas.js';
 import { MapManager } from './classes/MapManager.js';

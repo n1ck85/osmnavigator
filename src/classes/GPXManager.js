@@ -54,6 +54,7 @@ export class GPXManager {
                 alert('No route found in file');
             }
             this.mapManager.map.fitBounds(e.target.getBounds());
+            this.mapManager.cacheTilesForBounds(e.target.getBounds());
             // this.createTrkptMarkers();
         })
         .addTo(this.mapManager.map);
