@@ -21,7 +21,7 @@ const DEV_ASSETS = [
 ];
 
 async function getProdAssets() {
-  const res = await fetch(BASE + "manifest.json");
+  const res = await fetch(BASE + "manifest.webmanifest");
   const manifest = await res.json();
   return [
     BASE,
