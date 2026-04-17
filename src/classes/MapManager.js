@@ -36,8 +36,8 @@ export class MapManager {
         this.map = L.map(this.containerId).setView([0, 0], 17);
 
         L.tileLayer(this.tileLayerUrl, {
-            maxZoom: 17,
-            minZoom: 10,
+            maxZoom: 16,
+            minZoom: 6,
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
     }
@@ -183,8 +183,8 @@ export class MapManager {
     }
 
     cacheTilesForBounds(bounds) { 
-        const minZoom = this.map.getMinZoom();
-        const maxZoom = this.map.getMaxZoom();
+        const minZoom = 16;//this.map.getMinZoom();
+        const maxZoom = 10;//this.map.getMaxZoom();
         console.log(minZoom,maxZoom);
         const template = this.tileLayerUrl; 
 

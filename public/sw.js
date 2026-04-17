@@ -135,30 +135,32 @@ self.addEventListener("message", async event => {
     const cache = await caches.open(RUNTIME_CACHE);
 
     let i = 0;
-    const batchSize = 50;
 
-    while (i < tiles.length) {
-      const batch = tiles.slice(i, i + batchSize);
+    for (const url of tiles) {
+      i++;
 
-      for (const url of batch) {
-        try {
-          const req = new Request(url, { mode: "no-cors" });
+      try {
+        const req = new Request(url, { mode: "no-cors" });
 
-          const existing = await cache.match(req);
-          if (!existing) {
-            const res = await fetch(req);
-            if (res.ok || res.type === "opaque") {
-              await cache.put(req, res.clone());
-            }
-          }
-        } catch (err) {
-          console.warn("Tile fetch failed:", url, err);
+        // 1. Check if tile already exists in cache
+        const existing = await cache.match(req);
+        if (existing) {
+          console.log(`skipped (already cached) ${i} of ${tiles.length}`);
+          continue;
         }
 
-        i++;
+        // 2. Fetch tile
+        const res = await fetch(req);
+
+        // 3. Cache opaque or OK responses
+        if (res.type === "opaque" || res.ok) {
+          await cache.put(req, res.clone());
+        }
+
+        // Calculate progress
         const percent = Math.round((i / tiles.length) * 100);
 
-        // progress update
+        // Send progress back to the main thread
         self.clients.matchAll().then(clients => {
           clients.forEach(client => {
             client.postMessage({
@@ -169,11 +171,11 @@ self.addEventListener("message", async event => {
             });
           });
         });
-      }
 
-      // 🔥 yield to avoid SW being killed
-      await new Promise(r => setTimeout(r, 50));
+        console.log(`cached ${i} of ${tiles.length} tiles`);
+      } catch (err) {
+        console.warn("Tile fetch failed:", url, err);
+      }
     }
   }
 });
-

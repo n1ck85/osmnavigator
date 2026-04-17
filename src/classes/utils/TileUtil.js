@@ -42,11 +42,11 @@ export default class TileUtil {
       urls.push(...this.generateTileUrls(bounds, z, tileUrlTemplate));
       //console.log('genForAllZooms', bounds, z, tileUrlTemplate);
     }
-    console.log('generateForAllZooms', urls, bounds, minZoom, maxZoom, tileUrlTemplate);
+    // console.log('generateForAllZooms', urls, bounds, minZoom, maxZoom, tileUrlTemplate);
     return urls;
   }
 
-  static sendToServiceWorker(urls) { console.log('sending to service worker', urls);
+  static sendToServiceWorker(urls) { //console.log('sending to service worker', urls);
     if (navigator.serviceWorker.controller) {
       navigator.serviceWorker.controller.postMessage({
         type: "CACHE_TILES",
@@ -63,7 +63,6 @@ export default class TileUtil {
 
   static listenForTileCacheResponse() {
     navigator.serviceWorker.addEventListener("message", event => {
-      console.log('triggered');
       if (event.data?.type === "TILE_CACHE_PROGRESS") {
         const { percent, index, total } = event.data;
         TileUtil.updateProgress(percent);
