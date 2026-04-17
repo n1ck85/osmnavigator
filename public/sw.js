@@ -2,11 +2,13 @@ const VERSION = "v3";
 const STATIC_CACHE = `osmnav-static-${VERSION}`;
 const RUNTIME_CACHE = `osmnav-runtime-${VERSION}`;
 
+const IS_DEV = self.location.hostname === "localhost";
+
 // Detect base path dynamically (works on localhost + GitHub Pages)
 const BASE = self.location.pathname.replace(/sw\.js$/, "");
 
 // --- Static assets to pre-cache ---
-const STATIC_ASSETS = [
+const DEV_ASSETS = [
   `${BASE}`,
   `${BASE}index.html`,
   `${BASE}src/main.js`,
@@ -18,13 +20,36 @@ const STATIC_ASSETS = [
   `${BASE}src/classes/utils/TileUtil.js`,
 ];
 
-// --- Install ---
+async function getProdAssets() {
+  const res = await fetch(base + "manifest.json");
+  const manifest = await res.json();
+  return [
+    BASE,
+    BASE + "index.html",
+    ...Object.values(manifest).map(entry => BASE + entry.file),
+    ...Object.values(manifest)
+      .flatMap(entry => entry.css ? entry.css.map(c => BASE + c) : []),
+  ];
+}
+
 self.addEventListener("install", event => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(STATIC_CACHE).then(cache => cache.addAll(STATIC_ASSETS))
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open("static-v1");
+
+    const assets = IS_DEV
+      ? DEV_ASSETS
+      : await getProdAssets();
+
+    for (const url of assets) {
+      try {
+        await cache.add(url);
+      } catch (err) {
+        alert("SW failed to cache:", url, err);
+      }
+    }
+  })());
 });
+
 
 // --- Activate ---
 self.addEventListener("activate", event => {
