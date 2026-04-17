@@ -21,7 +21,7 @@ const DEV_ASSETS = [
 ];
 
 async function getProdAssets() {
-  const res = await fetch(base + "manifest.json");
+  const res = await fetch(BASE + "manifest.json");
   const manifest = await res.json();
   return [
     BASE,
@@ -44,7 +44,7 @@ self.addEventListener("install", event => {
       try {
         await cache.add(url);
       } catch (err) {
-        alert("SW failed to cache:", url, err);
+        console.warn("SW failed to cache:", url, err);
       }
     }
   })());
