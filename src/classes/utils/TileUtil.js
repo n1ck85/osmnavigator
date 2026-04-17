@@ -62,7 +62,7 @@ export default class TileUtil {
   }
 
   static listenForTileCacheResponse() {
-    navigator.serviceWorker.addEventListener("message", event => {
+    navigator.serviceWorker.addEventListener("message", event => { //console.log('triggered');
       if (event.data?.type === "TILE_CACHE_PROGRESS") {
         const { percent, index, total } = event.data;
         TileUtil.updateProgress(percent);

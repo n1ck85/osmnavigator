@@ -37,6 +37,7 @@ export class MapManager {
 
         L.tileLayer(this.tileLayerUrl, {
             maxZoom: 19,
+            maxNativeZoom: 16,
             minZoom: 6,
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
@@ -183,14 +184,14 @@ export class MapManager {
     }
 
     cacheTilesForBounds(bounds) { 
-        const minZoom = 16;//this.map.getMinZoom();
-        const maxZoom = 10;//this.map.getMaxZoom();
-        console.log(minZoom,maxZoom);
+        const minZoom = this.map.getMinZoom(); //10
+        const maxZoom = this.map.getMaxZoom(); //16
+        //console.log(minZoom,maxZoom);
         const template = this.tileLayerUrl; 
 
         const urls = TileUtil.generateForAllZooms(bounds, minZoom, maxZoom, template);
         
-        console.log('caching urls');
+        //console.log('caching urls');
         TileUtil.sendToServiceWorker(urls);
     }
 
