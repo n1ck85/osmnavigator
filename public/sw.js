@@ -80,7 +80,7 @@ self.addEventListener("fetch", event => {
         try {
           const res = await fetch(req);
           cache.put(req, res.clone());
-          trimCache(RUNTIME_CACHE, 100); // keep last 100 tiles
+          //trimCache(RUNTIME_CACHE, 1000); // keep last 1000 tiles
           return res;
         } catch {
           return cached || Response.error();
