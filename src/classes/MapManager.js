@@ -36,7 +36,7 @@ export class MapManager {
         this.map = L.map(this.containerId).setView([0, 0], 17);
 
         L.tileLayer(this.tileLayerUrl, {
-            maxZoom: 16,
+            maxZoom: 19,
             minZoom: 6,
             attribution: '© OpenStreetMap contributors'
         }).addTo(this.map);
