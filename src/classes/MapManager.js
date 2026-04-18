@@ -185,7 +185,7 @@ export class MapManager {
 
     cacheTilesForBounds(bounds) { 
         const minZoom = this.map.getMinZoom(); //10
-        const maxZoom = this.map.getMaxZoom(); //16
+        const maxZoom = /*this.map.getMaxZoom();*/16;
         //console.log(minZoom,maxZoom);
         const template = this.tileLayerUrl; 
 

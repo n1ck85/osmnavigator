@@ -65,58 +65,30 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// --- Fetch handler ---
 self.addEventListener("fetch", event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // 1. Navigation requests → return cached index.html
+  // 1. Navigation
   if (req.mode === "navigate") {
-    event.respondWith(
-      caches.match(`${BASE}index.html`).then(res => res || fetch(req))
-    );
+    event.respondWith(handleNavigation(req));
     return;
   }
 
-  // 2. Static assets → cache-first
-  if (req.url.startsWith(self.location.origin + BASE)) {
-    event.respondWith(
-      caches.match(req).then(cached => {
-        return (
-          cached ||
-          fetch(req).then(res => {
-            const copy = res.clone();
-            caches.open(STATIC_CACHE).then(cache => cache.put(req, copy));
-            return res;
-          })
-        );
-      })
-    );
+  // 2. Static assets
+  if (isStaticAsset(url)) {
+    event.respondWith(handleStatic(req));
     return;
   }
 
-  // 3. Map tiles → runtime cache with limit
-  if (url.hostname.includes("tile") || url.pathname.includes("/tiles/")) {
-    event.respondWith(
-      caches.open(RUNTIME_CACHE).then(async cache => {
-        const cached = await cache.match(req);
-        if (cached) return cached;
-
-        try {
-          const res = await fetch(req);
-          cache.put(req, res.clone());
-          //trimCache(RUNTIME_CACHE, 1000); // keep last 1000 tiles
-          return res;
-        } catch {
-          return cached || Response.error();
-        }
-      })
-    );
+  // 3. Tiles
+  if (isTile(url)) {
+    event.respondWith(handleTile(req));
     return;
   }
 
-  // 4. Everything else → network fallback
-  event.respondWith(fetch(req).catch(() => caches.match(req)));
+  // 4. Everything else
+  event.respondWith(fetch(req));
 });
 
 // --- Cache trimming helper ---
@@ -130,52 +102,116 @@ async function trimCache(name, maxItems) {
 }
 
 self.addEventListener("message", async event => {
-  if (event.data?.type === "CACHE_TILES") {
-    const { tiles } = event.data;
-    const cache = await caches.open(RUNTIME_CACHE);
+  if (event.data?.type !== "CACHE_TILES") return;
 
-    let i = 0;
+  const { tiles } = event.data;
+  const cache = await caches.open(RUNTIME_CACHE);
 
-    for (const url of tiles) {
-      i++;
+  let i = 0;
 
-      try {
-        const req = new Request(url, { mode: "no-cors" });
+  for (const url of tiles) {
+    i++;
 
-        // 1. Check if tile already exists in cache
-        const existing = await cache.match(req);
-        if (existing) {
-          console.log(`skipped (already cached) ${i} of ${tiles.length}`);
-          continue;
-        }
+    try {
+      const req = new Request(url); // CORS, not no-cors
 
-        // 2. Fetch tile
-        const res = await fetch(req);
+      // Skip if already cached
+      const existing = await cache.match(req);
+      if (existing) continue;
 
-        // 3. Cache opaque or OK responses
-        if (res.type === "opaque" || res.ok) {
-          await cache.put(req, res.clone());
-        }
+      const res = await fetch(req);
 
-        // Calculate progress
-        const percent = Math.round((i / tiles.length) * 100);
+      // Only cache valid raster tiles
+      if (res.ok && res.headers.get("content-type")?.includes("image")) {
+        await cache.put(req, res.clone());
+      }
 
-        // Send progress back to the main thread
-        self.clients.matchAll().then(clients => {
-          clients.forEach(client => {
-            client.postMessage({
-              type: "TILE_CACHE_PROGRESS",
-              index: i,
-              total: tiles.length,
-              percent
-            });
+      // progress
+      const percent = Math.round((i / tiles.length) * 100);
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: "TILE_CACHE_PROGRESS",
+            index: i,
+            total: tiles.length,
+            percent
           });
         });
-
-        console.log(`cached ${i} of ${tiles.length} tiles`);
-      } catch (err) {
-        console.warn("Tile fetch failed:", url, err);
-      }
+      });
+      console.log(`Cached tile ${i}/${tiles.length}: ${url}`);
+    } catch (err) {
+      console.warn("Tile fetch failed:", url, err);
     }
   }
 });
+
+
+// -----------------------------
+// 1. Navigation handler
+// -----------------------------
+function handleNavigation(req) {
+  return caches.match(`${BASE}index.html`).then(cached => {
+    return cached || fetch(req);
+  });
+}
+
+// -----------------------------
+// 2. Static asset detection
+// -----------------------------
+function isStaticAsset(url) {
+  return (
+    url.pathname.endsWith(".js") ||
+    url.pathname.endsWith(".css") ||
+    url.pathname.endsWith(".html") ||
+    url.pathname.endsWith(".webmanifest")
+  );
+}
+
+// -----------------------------
+// 3. Static asset handler
+// -----------------------------
+function handleStatic(req) {
+  return caches.match(req).then(cached => {
+    if (cached) return cached;
+
+    return fetch(req).then(res => {
+      const clone = res.clone(); // clone FIRST
+      caches.open(STATIC_CACHE).then(cache => cache.put(req, clone));
+      return res;
+    });
+  });
+}
+
+// -----------------------------
+// 4. Tile detection (strict whitelist)
+// -----------------------------
+function isTile(url) {
+  return (
+    url.hostname.includes("maptiler") &&
+    /\/\d+\/\d+\/\d+\.(png|jpg)/.test(url.pathname)
+  );
+}
+
+// -----------------------------
+// 5. Tile handler (safe + trimmed)
+// -----------------------------
+function handleTile(req) {
+  return caches.open(RUNTIME_CACHE).then(async cache => {
+    const cached = await cache.match(req);
+    if (cached) return cached;
+
+    try {
+      const res = await fetch(req);
+
+      if (res.ok) {
+        cache.put(req, res.clone());
+        trimCache(RUNTIME_CACHE, 1000);
+      }
+
+      return res;
+    } catch {
+      return cached || Response.error();
+    }
+  });
+}
+
