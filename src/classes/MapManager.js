@@ -39,7 +39,12 @@ export class MapManager {
             maxZoom: 19,
             maxNativeZoom: 16,
             minZoom: 6,
-            attribution: '© OpenStreetMap contributors'
+            attribution: 
+               `<a href="https://www.maptiler.com">
+                <img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo">
+                </a>
+                <br>
+                © OpenStreetMap contributors`
         }).addTo(this.map);
     }
 
