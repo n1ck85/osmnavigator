@@ -9,11 +9,12 @@ export class NavigationManager {
         this.lastKnownLocation = null;
         this.lastKnownAccuracy = null;
         this.trackThreshold = 50;// + this.lastKnownAccuracy(changed on update)
-        this.updateThrottle = 5000; // Minimum gap between navigation updates in milliseconds
+        this.updateThrottle = 1000; // Minimum gap between navigation updates in milliseconds
         this.lastUpdateTime = 0;
         this.offRoute = false;
         this.segmentBearings = null;
         this.turns = null;
+        this.minTurnSpacing = 5; // Minimum distance in meters between consecutive turns to avoid clutter
         this.cumulativeDistances = null;
         this.turnState = {
             early: false,
@@ -191,6 +192,10 @@ export class NavigationManager {
             const type = this.classifyTurn(angle);
             if (!type) continue;
 
+
+            if (cumulativeDistances[i] - (turns.at(-1)?.distanceFromStart || 0) < this.minTurnSpacing)
+            continue;
+
             turns.push({
                 index: i,
                 lat: points[i].lat,
@@ -237,8 +242,8 @@ export class NavigationManager {
     classifyTurn(angle) {
         const abs = Math.abs(angle);
 
-        if (abs < 20) return null;
-        if (abs < 45) return angle > 0 ? "slight right" : "slight left";
+        if (abs < 35) return null;
+        if (abs < 70) return angle > 0 ? "slight right" : "slight left";
         if (abs < 120) return angle > 0 ? "right" : "left";
         if (abs < 170) return angle > 0 ? "sharp right" : "sharp left";
         return "u-turn";
@@ -254,7 +259,7 @@ export class NavigationManager {
         console.log(`Distance to next turn: ${Math.round(distToTurn)} meters`);
 
         if (nextTurn.index !== this.turnState.lastTurnIndex) {
-            console.log("reset turn state");
+
             this.turnState = {
                 early: false,
                 near: false,
@@ -263,12 +268,12 @@ export class NavigationManager {
             };
         }
 
-        if (distToTurn < 120 && !this.turnState.early) {
+        if (distToTurn < 50 && !this.turnState.early) {
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.early = true;
         }
 
-        if (distToTurn < 40 && !this.turnState.near) {
+        if (distToTurn < 25 && !this.turnState.near) {
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.near = true;
         }
