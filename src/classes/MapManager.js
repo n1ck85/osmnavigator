@@ -10,7 +10,7 @@ export class MapManager {
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;
-        this.polyline = null;
+        // this.polyline = null;
         this.gpxManager = null;
 
        this.initializeMap();
@@ -161,11 +161,26 @@ export class MapManager {
         return { closestTrkpt: closest, dist: minDist };
     }
 
+    getCurrentPolyline() {
+        let polyline = null;
+        this.map.eachLayer(l => {
+            if (l instanceof L.Polyline) {
+                //get the polyline with the specified classname
+                if (l.options.className === 'route-line') {
+                    polyline = l.getLatLngs().map(p => ({ lat: p.lat, lng: p.lng }));
+                }
+            }
+        });
+        return polyline;
+    }
+
     getClosestPointOnPolyline(latlng) {
         const targetPoint = this.map.latLngToLayerPoint(latlng);
-        const latlngs = this.gpxManager.trackPoints;
+        const latlngs = this.getCurrentPolyline();
 
         let closest = null;
+        let closestIndex = null;
+        let closestFraction = 0;
         let minDist = Infinity;
 
         for (let i = 0; i < latlngs.length - 1; i++) {
@@ -178,12 +193,19 @@ export class MapManager {
             if (dist < minDist) {
                 minDist = dist;
                 closest = candidate;
+                closestIndex = i;
+
+                // compute fraction along segment
+                const segLen = p1.distanceTo(p2);
+                const userLen = p1.distanceTo(candidate);
+                closestFraction = segLen === 0 ? 0 : (userLen / segLen);
             }
         }
 
         return {
+            index: closestIndex,
+            fraction: closestFraction,
             latlng: this.map.layerPointToLatLng(closest),
-            // distancePixels: minDist,
             distanceMeters: latlng.distanceTo(this.map.layerPointToLatLng(closest))
         };
     }
@@ -197,7 +219,7 @@ export class MapManager {
         const urls = TileUtil.generateForAllZooms(bounds, minZoom, maxZoom, template);
         
         //console.log('caching urls');
-        TileUtil.sendToServiceWorker(urls);
+        //TileUtil.sendToServiceWorker(urls);
     }
 
 }
