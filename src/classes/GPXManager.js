@@ -1,6 +1,7 @@
 export class GPXManager {
-    constructor(mapManager) {
+    constructor(mapManager, deviceManager) {
         this.mapManager = mapManager;
+        this.deviceManager = deviceManager;
         this.trackPoints = [];
         this.trackPointMarkers = [];
         this.totalDistance = 0;

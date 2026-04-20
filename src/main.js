@@ -16,9 +16,9 @@ import { map } from 'leaflet';
 
 // Initialize all managers
 const mapManager = new MapManager('map');
-const speechManager = new SpeechManager();
-const gpxManager = new GPXManager(mapManager);
 const deviceManager = new DeviceManager();
+const speechManager = new SpeechManager();
+const gpxManager = new GPXManager(mapManager, deviceManager);
 const navigationManager = new NavigationManager(mapManager, gpxManager, speechManager, deviceManager);
 const uiManager = new UIManager(mapManager, gpxManager, navigationManager, deviceManager);
 
