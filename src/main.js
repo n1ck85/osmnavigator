@@ -7,6 +7,7 @@ if ('serviceWorker' in navigator) {
 import './style.css';
 
 import 'bootstrap/js/dist/offcanvas.js';
+import 'bootstrap/js/dist/collapse.js';
 import { MapManager } from './classes/MapManager.js';
 import { GPXManager } from './classes/GPXManager.js';
 import { NavigationManager } from './classes/NavigationManager.js';
