@@ -1,18 +1,18 @@
 if ('serviceWorker' in navigator) {
-  //navigator.serviceWorker.register('/osmnavigator/sw.js');
-      navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
-
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`);
 }
 
 import './style.css';
 
 import 'bootstrap/js/dist/offcanvas.js';
 import 'bootstrap/js/dist/collapse.js';
+import { UIManager } from './classes/UIManager.js';
 import { MapManager } from './classes/MapManager.js';
 import { GPXManager } from './classes/GPXManager.js';
 import { NavigationManager } from './classes/NavigationManager.js';
 import { DeviceManager } from './classes/DeviceManager.js';
 import { SpeechManager } from './classes/SpeechManager.js';
+import { map } from 'leaflet';
 
 // Initialize all managers
 const mapManager = new MapManager('map');
@@ -20,15 +20,10 @@ const speechManager = new SpeechManager();
 const gpxManager = new GPXManager(mapManager);
 const deviceManager = new DeviceManager();
 const navigationManager = new NavigationManager(mapManager, gpxManager, speechManager, deviceManager);
+const uiManager = new UIManager(mapManager, gpxManager, navigationManager, deviceManager);
 
 // Pass managers to mapManager as mapManager is initialized first
 mapManager.setManagers([gpxManager, navigationManager]);
-
-// Set up event listeners
-document.getElementById('gpx-upload-input').addEventListener('change', (e) => gpxManager.loadGPX(e));
-document.getElementById('navigate').addEventListener('click', () => navigationManager.startNavigation());
-document.getElementById('follow-user').addEventListener('click', (e) => navigationManager.toggleFollowUser(e));
-document.getElementById('wake-lock').addEventListener('click', (e) => deviceManager.toggleWakeLock(e));
 
 // Start location tracking
 navigationManager.startLocationTracking();

@@ -20,6 +20,25 @@ export class DeviceManager {
         }
     }
 
+    savePreference(key, value) {
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem(key, JSON.stringify(value));
+        } else {
+            alert("Sorry, your browser does not support Web Storage. Preferences cannot be saved.");
+        }
+    }
+
+    getPreference(key) {
+        if (typeof(Storage) !== "undefined") {
+            const value = localStorage.getItem(key);
+            if (value !== null) {
+                return JSON.parse(value);
+            }
+            return null;
+        }
+    }
+
+
     startOrientationTracking() {
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
             // iOS 13+ Safari requires this call

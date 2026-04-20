@@ -53,8 +53,12 @@ export class GPXManager {
             if(!this.trackPoints.length) {
                 alert('No route found in file');
             }
+
             this.mapManager.map.fitBounds(e.target.getBounds());
-            this.mapManager.cacheTilesForBounds(e.target.getBounds());
+
+            if(this.deviceManager.getPreference('mapCachingEnabled')) { 
+                this.mapManager.cacheTilesForBounds(e.target.getBounds());
+            }
             // this.createTrkptMarkers();
         })
         .addTo(this.mapManager.map);

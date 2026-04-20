@@ -219,7 +219,7 @@ export class MapManager {
         const urls = TileUtil.generateForAllZooms(bounds, minZoom, maxZoom, template);
         
         //console.log('caching urls');
-        //TileUtil.sendToServiceWorker(urls);
+        TileUtil.sendToServiceWorker(urls);
     }
 
 }

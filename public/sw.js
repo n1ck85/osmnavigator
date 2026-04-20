@@ -7,17 +7,22 @@ const BASE = self.location.pathname.replace(/sw\.js$/, "");
 
 // In development, we can hardcode the list of assets since they won't be hashed.
 const DEV_ASSETS = [
-  `${BASE}`, `${BASE}index.html`, `${BASE}src/main.js`,
-  `${BASE}src/classes/MapManager.js`, `${BASE}src/classes/GPXManager.js`,
-  `${BASE}src/classes/NavigationManager.js`, `${BASE}src/classes/DeviceManager.js`,
-  `${BASE}src/classes/SpeechManager.js`, `${BASE}src/classes/utils/TileUtil.js`,
+  `${BASE}`, `${BASE}index.html`, 
+  `${BASE}src/main.js`,
+  `${BASE}src/classes/MapManager.js`, 
+  `${BASE}src/classes/GPXManager.js`,
+  `${BASE}src/classes/NavigationManager.js`, 
+  `${BASE}src/classes/DeviceManager.js`,
+  `${BASE}src/classes/SpeechManager.js`, 
+  `${BASE}src/classes/utils/TileUtil.js`,
 ];
 
 async function getProdAssets() {
   const res = await fetch(BASE + "manifest.webmanifest");
   const manifest = await res.json();
   return [
-    BASE, BASE + "index.html",
+    BASE, 
+    BASE + "index.html",
     ...Object.values(manifest).map(entry => BASE + entry.file),
     ...Object.values(manifest).flatMap(entry => entry.css ? entry.css.map(c => BASE + c) : []),
   ];
