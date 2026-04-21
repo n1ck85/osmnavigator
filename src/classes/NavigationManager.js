@@ -255,7 +255,7 @@ export class NavigationManager {
         console.log("Next turn:", nextTurn);
         if (!nextTurn) return;
 
-        const distToTurn = nextTurn.distanceFromStart - progress.distance;
+        const distToTurn = (nextTurn.distanceFromStart - progress.distance) + (this.lastKnownAccuracy / 2);
         console.log(`Distance to next turn: ${Math.round(distToTurn)} meters`);
 
         if (nextTurn.index !== this.turnState.lastTurnIndex) {
@@ -268,12 +268,12 @@ export class NavigationManager {
             };
         }
 
-        if (distToTurn < 50 && !this.turnState.early) {
+        if (distToTurn < 80 && !this.turnState.early) {
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.early = true;
         }
 
-        if (distToTurn < 25 && !this.turnState.near) {
+        if (distToTurn < 40 && !this.turnState.near) {
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.near = true;
         }
