@@ -243,7 +243,7 @@ export class NavigationManager {
         const abs = Math.abs(angle);
 
         if (abs < 35) return null;
-        if (abs < 70) return angle > 0 ? "slight right" : "slight left";
+        if (abs < 60) return angle > 0 ? "slight right" : "slight left";
         if (abs < 120) return angle > 0 ? "right" : "left";
         if (abs < 170) return angle > 0 ? "sharp right" : "sharp left";
         return "u-turn";
@@ -286,9 +286,9 @@ export class NavigationManager {
 
     offRouteDetection() {
         const { distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
-        this.trackThreshold = this.trackThreshold + (this.lastKnownAccuracy / 2);
+        const threshold = this.trackThreshold + (this.lastKnownAccuracy / 2);
 
-        if (distanceMeters > this.trackThreshold)
+        if (distanceMeters > threshold)
             return distanceMeters;
         else
             return 0;

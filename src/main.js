@@ -6,12 +6,12 @@ import './style.css';
 
 import 'bootstrap/js/dist/offcanvas.js';
 import 'bootstrap/js/dist/collapse.js';
-import { UIManager } from './classes/UIManager.js';
 import { MapManager } from './classes/MapManager.js';
 import { GPXManager } from './classes/GPXManager.js';
 import { NavigationManager } from './classes/NavigationManager.js';
 import { DeviceManager } from './classes/DeviceManager.js';
 import { SpeechManager } from './classes/SpeechManager.js';
+import { UIManager } from './classes/UIManager.js';
 import { map } from 'leaflet';
 
 // Initialize all managers
