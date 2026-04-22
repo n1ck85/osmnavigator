@@ -8,9 +8,9 @@ export class NavigationManager {
         this.followUser = true;
         this.lastKnownLocation = null;
         this.lastKnownAccuracy = null;
-        this.trackThreshold = 50;// + this.lastKnownAccuracy(changed on update)
-        this.updateThrottle = 1000; // Minimum gap between navigation updates in milliseconds
-        this.lastUpdateTime = 0;
+        this.trackThreshold = 50;
+        // this.updateThrottle = 1000; // Minimum gap between navigation updates in milliseconds
+        //this.lastUpdateTime = 0;
         this.offRoute = false;
         this.segmentBearings = null;
         this.turns = null;
@@ -35,8 +35,8 @@ export class NavigationManager {
         this.mapManager.map.locate({ 
             watch: true, 
             enableHighAccuracy: true,
-            minimumAge: 3000,
-            setTimeout: 8000,
+            // minimumAge: 3000,
+            // setTimeout: 8000,
             setView: false, 
             maxZoom: 16 
         });
@@ -121,9 +121,9 @@ export class NavigationManager {
     updateNavigation() {
         if (!this.isNavigating) return;
 
-        const now = performance.now();
-        if (now - this.lastUpdateTime < this.updateThrottle) return;
-        this.lastUpdateTime = now;
+        // const now = performance.now();
+        // if (now - this.lastUpdateTime < this.updateThrottle) return;
+        // this.lastUpdateTime = now;
         
         const distanceOffRoute = this.offRouteDetection();
         if (distanceOffRoute > 0) {
