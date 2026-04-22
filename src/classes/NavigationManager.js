@@ -14,7 +14,7 @@ export class NavigationManager {
         this.offRoute = false;
         this.segmentBearings = null;
         this.turns = null;
-        this.minTurnSpacing = 5; // Minimum distance in meters between consecutive turns to avoid clutter
+        this.minTurnSpacing = 0; // Minimum distance in meters between consecutive turns to avoid clutter
         this.cumulativeDistances = null;
         this.turnState = {
             early: false,
@@ -71,6 +71,16 @@ export class NavigationManager {
         if (this.isNavigating) {
             this.speechManager.speak("Navigation stopped");
             this.isNavigating = false;
+            this.offRoute = false;
+            this.segmentBearings = null;
+            this.turns = null;
+            this.cumulativeDistances = null;
+            this.turnState = {
+                early: false,
+                near: false,
+                now: false,
+                lastTurnIndex: -1
+            };
 
             const navigateBtnIcon = document.querySelector("#navigate i");
             if (navigateBtnIcon) {
