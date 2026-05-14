@@ -252,7 +252,7 @@ export class NavigationManager {
     classifyTurn(angle) {
         const abs = Math.abs(angle);
 
-        if (abs < 35) return null;
+        if (abs < 25) return null;
         if (abs < 60) return angle > 0 ? "slight right" : "slight left";
         if (abs < 120) return angle > 0 ? "right" : "left";
         if (abs < 170) return angle > 0 ? "sharp right" : "sharp left";
@@ -265,7 +265,7 @@ export class NavigationManager {
         console.log("Next turn:", nextTurn);
         if (!nextTurn) return;
 
-        const distToTurn = (nextTurn.distanceFromStart - progress.distance) + (this.lastKnownAccuracy / 2);
+        const distToTurn = (nextTurn.distanceFromStart - progress.distance);// + (this.lastKnownAccuracy / 2);
         console.log(`Distance to next turn: ${Math.round(distToTurn)} meters`);
 
         if (nextTurn.index !== this.turnState.lastTurnIndex) {
