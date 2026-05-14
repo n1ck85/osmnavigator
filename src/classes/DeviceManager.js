@@ -90,19 +90,11 @@ export class DeviceManager {
 
         if ('wakeLock' in navigator) {
             if (!this.wakeLockActive) {
-                navigator.wakeLock.request('screen').then(sentinel => {
-                    this.wakeLockSentinel = sentinel;
-                    this.wakeLockActive = true;
-                    if (icon) {
-                        icon.classList.remove("bi-eye");
-                        icon.classList.add("bi-eye-fill");
-                    }
-                }).catch(err => {
-                    console.error('Wake Lock failed:', err);
-                    this.supportLogger("Wake Lock", "Failed to activate Wake Lock.");
-                });
+                this.wakeLockActive = true;
+                this.keepAwake(icon);
             }
-            else {
+            else {//user has requested to release wake lock
+                this.wakeLockActive = false;
                 this.wakeLockSentinel.release().then(() => {
                     this.wakeLockActive = false;
                     if (icon) {
@@ -110,9 +102,35 @@ export class DeviceManager {
                         icon.classList.add("bi-eye");
                     }
                 }); 
+                console.log("Wake Lock released by user."); 
             }
         } else {
-            this.supportLogger("Wake Lock", "Wake Lock API not supported on this device.");
+            console.log("Wake Lock", "Wake Lock API not supported on this device.");
         }
+    }
+
+    keepAwake(icon) {
+        navigator.wakeLock.request('screen').then(sentinel => {
+            this.wakeLockSentinel = sentinel;
+            if (icon) {
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-fill");
+            }
+            //ensure wake lock is re-acquired if released unexpectedly by the system
+            sentinel.addEventListener('release', () => {
+                if( this.wakeLockActive ) {
+                    console.log("Wake Lock", "Wake Lock was released unexpectedly. Attempting to re-acquire...");
+                    this.keepAwake(icon);
+                }
+            });
+            console.log("Wake Lock is active.");
+        }).catch(err => {
+            console.error('Wake Lock failed:', err);
+            this.supportLogger("Wake Lock", "Failed to activate Wake Lock.");
+            icon.classList.remove("bi-eye-fill");
+            icon.classList.add("bi-eye");
+            alert("Wake Lock Disabled");
+            this.wakeLockActive = false;
+        });
     }
 }
