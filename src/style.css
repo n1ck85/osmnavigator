@@ -17,11 +17,11 @@
 
 .leaflet-map-pane {
   /* transform-origin: center center; */
-  /* transition: transform 0.1s linear; */
+  transition: transform 0.1s linear;
 }
 
 #heading-marker {
-  /* transition: transform 0.1s linear; */
+  transition: transform 0.1s linear;
 } 
 
 #device-support-log {
