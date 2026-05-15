@@ -90,8 +90,8 @@ export class DeviceManager {
     }
 
     rotateLeafletMap(deg, marker) {
-        const map = document.getElementById('map'); // used for size
-        const pane = document.querySelector('.leaflet-map-pane'); // rotated by heading value
+        const map = document.getElementById('map');
+        const pane = document.querySelector('.leaflet-map-pane');
 
         // Initialize to current heading on first rotation
         if (!pane.hasAttribute('data-rotation-initialized')) {
@@ -99,24 +99,20 @@ export class DeviceManager {
             deg = this.heading;
         }
 
+        // Use map container center as fixed rotation point (prevents drift from panning)
         const w = map.offsetWidth;
         const h = map.offsetHeight;
-
-        // Get the heading marker's screen position
-        const markerRect = marker.getBoundingClientRect();
-        const mapRect = map.getBoundingClientRect();
-        
-        const markerX = markerRect.left - mapRect.left + markerRect.width / 2;
-        const markerY = markerRect.top - mapRect.top + markerRect.height / 2;
+        const cx = w / 2;
+        const cy = h / 2;
 
         pane.style.transform =
-            `translate3d(${markerX}px, ${markerY}px, 0)
-            rotateZ(${deg}deg)
-            translate3d(${-markerX}px, ${-markerY}px, 0)`;
+            `translate3d(${cx}px, ${cy}px, 0)
+            rotateZ(${-deg}deg)
+            translate3d(${-cx}px, ${-cy}px, 0)`;
 
-        //marker must rotate the opposite direction to stay aligned with the real world
+        // Marker must rotate the opposite direction to stay aligned with the real world
         if (marker) {
-            marker.style.transform = `rotate(${-deg}deg)`;
+            marker.style.transform = `rotate(${deg}deg)`;
         }
 
         /** Copy this into the console to test heading with a slider **
