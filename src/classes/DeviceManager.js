@@ -78,11 +78,28 @@ export class DeviceManager {
 
     setHeading(heading) {
         this.heading = heading;
-        const el = document.getElementById("heading-marker");
+        // const marker = document.getElementById("heading-marker");
+        
+        // if (marker) {
+        //     marker.style.transform = `rotate(${heading}deg)`;
+        // }
 
-        if (el) {
-            el.style.transform = `rotate(${heading}deg)`;
-        }
+        this.rotateLeafletMap(heading);
+    }
+
+    rotateLeafletMap(deg) {
+        const pane = document.querySelector('.leaflet-map-pane');
+
+        // Read Leaflet's internal translate3d
+        const style = window.getComputedStyle(pane);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+
+        const tx = matrix.m41; // X translation
+        const ty = matrix.m42; // Y translation
+
+        // Apply inverse translation → rotate → reapply translation
+        pane.style.transform =
+            `translate3d(${tx}px, ${ty}px, 0) rotateZ(${-deg}deg)`;
     }
 
     toggleWakeLock(e) {console.log("Toggling Wake Lock...");
