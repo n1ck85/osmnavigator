@@ -5,7 +5,7 @@ export class DeviceManager {
         this.rotateMap = false;
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
-        this.headingUpdateThrottle = 100; // Minimum gap between heading updates in milliseconds
+        this.headingUpdateThrottle = 500; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
     }
 
@@ -58,7 +58,7 @@ export class DeviceManager {
     getHeading(event) {
         const now = performance.now();
 
-        // throttle to 10Hz (100ms)
+        // throttle heading
         if (now - this.lastHeadingUpdate < this.headingUpdateThrottle) return;
         this.lastHeadingUpdate = now;
 
