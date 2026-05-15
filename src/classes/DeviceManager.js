@@ -78,7 +78,26 @@ export class DeviceManager {
     }
 
     setHeading(heading) {
-        this.heading = parseFloat(heading.toFixed(2));
+        // Validate heading is a number
+        if (typeof heading !== 'number' || isNaN(heading)) {
+            console.warn('Invalid heading value:', heading);
+            return;
+        }
+
+        // Normalize heading to 0-360 range
+        const normalizedHeading = ((heading % 360) + 360) % 360;
+
+        // Filter out unrealistic jumps (likely sensor glitches)
+        // Allow up to 45 degree change per update (at 100ms throttle = 450°/sec max)
+        const headingDiff = Math.abs(normalizedHeading - this.heading);
+        const wrappedDiff = Math.min(headingDiff, 360 - headingDiff);
+        
+        if (wrappedDiff > 45) {
+            console.warn(`Heading jump filtered: ${this.heading}° -> ${normalizedHeading}° (diff: ${wrappedDiff}°)`);
+            return;
+        }
+
+        this.heading = parseFloat(normalizedHeading.toFixed(2));
         const marker = document.getElementById("heading-marker");
         
         if(!this.rotateMap) {
