@@ -14,6 +14,7 @@ export class UIManager {
         document.getElementById('navigate').addEventListener('click', () => this.navigationManager.startNavigation());
         document.getElementById('follow-user').addEventListener('click', (e) => this.navigationManager.toggleFollowUser(e));
         document.getElementById('wake-lock').addEventListener('click', (e) => this.deviceManager.toggleWakeLock(e));
+        document.getElementById('map-rotate').addEventListener('click', (e) => this.deviceManager.rotateMapToggle(e));
 
         document.getElementById('mapCachingSwitch').addEventListener('change', (e) => {
             this.deviceManager.savePreference('mapCachingEnabled', e.target.checked);

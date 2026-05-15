@@ -2,6 +2,7 @@ export class DeviceManager {
     constructor() {
         this.wakeLockSentinel = null;
         this.wakeLockActive = false;
+        this.rotateMap = false;
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
         this.headingUpdateThrottle = 100; // Minimum gap between heading updates in milliseconds
@@ -78,28 +79,60 @@ export class DeviceManager {
 
     setHeading(heading) {
         this.heading = heading;
-        // const marker = document.getElementById("heading-marker");
+        const marker = document.getElementById("heading-marker");
         
-        // if (marker) {
-        //     marker.style.transform = `rotate(${heading}deg)`;
-        // }
-
-        this.rotateLeafletMap(heading);
+        if(!this.rotateMap) {
+            marker.style.transform = `rotate(${heading}deg)`;
+        }
+        else {
+            this.rotateLeafletMap(heading, marker);
+        }
     }
 
-    rotateLeafletMap(deg) {
-        const pane = document.querySelector('.leaflet-map-pane');
+    rotateLeafletMap(deg, marker) {
+        const map = document.getElementById('map'); // used for size
+        const pane = document.querySelector('.leaflet-map-pane'); // rotated by heading value
 
-        // Read Leaflet's internal translate3d
-        const style = window.getComputedStyle(pane);
-        const matrix = new DOMMatrixReadOnly(style.transform);
+        const w = map.offsetWidth;
+        const h = map.offsetHeight;
 
-        const tx = matrix.m41; // X translation
-        const ty = matrix.m42; // Y translation
+        const cx = w / 2;
+        const cy = h / 2;
 
-        // Apply inverse translation → rotate → reapply translation
         pane.style.transform =
-            `translate3d(${tx}px, ${ty}px, 0) rotateZ(${-deg}deg)`;
+            `translate3d(${cx}px, ${cy}px, 0)
+            rotateZ(${deg}deg)
+            translate3d(${-cx}px, ${-cy}px, 0)`;
+
+        //marker must rotate the opposite direction to stay aligned with the real world
+        if (marker) {
+            marker.style.transform = `rotate(${-deg}deg)`;
+        }
+
+        /** Copy this into the console to test heading with a slider **
+        const slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = 0;
+        slider.max = 359;
+        slider.value = 0;
+        slider.style.position = "fixed";
+        slider.style.bottom = "20px";
+        slider.style.left = "20px";
+        slider.style.zIndex = 999999;
+        slider.style.width = "300px";
+
+        slider.oninput = () => {
+        const deg = Number(slider.value);
+        window.dispatchEvent(new DeviceOrientationEvent("deviceorientationabsolute", {
+            alpha: deg,
+            beta: 0,
+            gamma: 0,
+            absolute: true
+        }));
+        };
+
+        document.body.appendChild(slider);
+        */
     }
 
     toggleWakeLock(e) {console.log("Toggling Wake Lock...");
@@ -149,5 +182,20 @@ export class DeviceManager {
             alert("Wake Lock Disabled");
             this.wakeLockActive = false;
         });
+    }
+
+    rotateMapToggle(e) {
+        const icon = e.currentTarget.querySelector("i");
+        this.rotateMap = !this.rotateMap;
+
+        if (this.rotateMap) {
+            icon.classList.remove("bi-compass");
+            icon.classList.add("bi-compass-fill");
+        }
+        else {
+            icon.classList.remove("bi-compass-fill");
+            icon.classList.add("bi-compass");
+        }
+        console.log("Map rotation enabled: "+this.rotateMap);
     }
 }
