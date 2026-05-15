@@ -78,14 +78,14 @@ export class DeviceManager {
     }
 
     setHeading(heading) {
-        this.heading = heading;
+        this.heading = parseFloat(heading.toFixed(2));
         const marker = document.getElementById("heading-marker");
         
         if(!this.rotateMap) {
-            marker.style.transform = `rotate(${heading}deg)`;
+            marker.style.transform = `rotate(${this.heading}deg)`;
         }
         else {
-            this.rotateLeafletMap(heading, marker);
+            this.rotateLeafletMap(this.heading, marker);
         }
     }
 
