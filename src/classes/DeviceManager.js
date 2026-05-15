@@ -7,6 +7,8 @@ export class DeviceManager {
         this.heading = 0;
         this.headingUpdateThrottle = 100; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
+        this.pendingHeadingUpdate = null; // Track pending RAF callback
+        this.pendingHeading = null; // Store pending heading value
     }
 
     supportLogger(name,message) {
@@ -97,15 +99,29 @@ export class DeviceManager {
             return;
         }
 
-        this.heading = parseFloat(normalizedHeading.toFixed(2));
-        const marker = document.getElementById("heading-marker");
-        
-        if(!this.rotateMap) {
-            marker.style.transform = `rotate(${this.heading}deg)`;
+        // Store the pending heading value
+        this.pendingHeading = normalizedHeading;
+
+        // Cancel any pending update and schedule a new one
+        if (this.pendingHeadingUpdate !== null) {
+            cancelAnimationFrame(this.pendingHeadingUpdate);
         }
-        else {
-            this.rotateLeafletMap(this.heading, marker);
-        }
+
+        // Use requestAnimationFrame to batch updates and prevent queuing
+        this.pendingHeadingUpdate = requestAnimationFrame(() => {
+            if (this.pendingHeading !== null) {
+                this.heading = parseFloat(this.pendingHeading.toFixed(2));
+                const marker = document.getElementById("heading-marker");
+                
+                if(!this.rotateMap) {
+                    marker.style.transform = `rotate(${this.heading}deg)`;
+                }
+                else {
+                    this.rotateLeafletMap(this.heading, marker);
+                }
+            }
+            this.pendingHeadingUpdate = null;
+        });
     }
 
     rotateLeafletMap(deg, marker) {
