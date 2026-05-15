@@ -93,16 +93,26 @@ export class DeviceManager {
         const map = document.getElementById('map'); // used for size
         const pane = document.querySelector('.leaflet-map-pane'); // rotated by heading value
 
+        // Initialize to current heading on first rotation
+        if (!pane.hasAttribute('data-rotation-initialized')) {
+            pane.setAttribute('data-rotation-initialized', 'true');
+            deg = this.heading;
+        }
+
         const w = map.offsetWidth;
         const h = map.offsetHeight;
 
-        const cx = w / 2;
-        const cy = h / 2;
+        // Get the heading marker's screen position
+        const markerRect = marker.getBoundingClientRect();
+        const mapRect = map.getBoundingClientRect();
+        
+        const markerX = markerRect.left - mapRect.left + markerRect.width / 2;
+        const markerY = markerRect.top - mapRect.top + markerRect.height / 2;
 
         pane.style.transform =
-            `translate3d(${cx}px, ${cy}px, 0)
+            `translate3d(${markerX}px, ${markerY}px, 0)
             rotateZ(${deg}deg)
-            translate3d(${-cx}px, ${-cy}px, 0)`;
+            translate3d(${-markerX}px, ${-markerY}px, 0)`;
 
         //marker must rotate the opposite direction to stay aligned with the real world
         if (marker) {
@@ -191,10 +201,21 @@ export class DeviceManager {
         if (this.rotateMap) {
             icon.classList.remove("bi-compass");
             icon.classList.add("bi-compass-fill");
+            // Initialize map rotation to current heading
+            const marker = document.getElementById("heading-marker");
+            this.rotateLeafletMap(this.heading, marker);
         }
         else {
             icon.classList.remove("bi-compass-fill");
             icon.classList.add("bi-compass");
+            // Reset map and clear initialization flag
+            const pane = document.querySelector('.leaflet-map-pane');
+            pane.style.transform = 'translate3d(0, 0, 0)';
+            pane.removeAttribute('data-rotation-initialized');
+            const marker = document.getElementById("heading-marker");
+            if (marker) {
+                marker.style.transform = 'rotate(0deg)';
+            }
         }
         console.log("Map rotation enabled: "+this.rotateMap);
     }
