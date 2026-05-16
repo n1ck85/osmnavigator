@@ -5,8 +5,11 @@ export class DeviceManager {
         this.rotateMap = false;
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
-        this.headingUpdateThrottle = 500; // Minimum gap between heading updates in milliseconds
+        this.lastRotationAngle = 0; // Tracks the actual rotation angle applied
+        this.headingUpdateThrottle = 100; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
+        this.pendingHeadingUpdate = null; // Track pending RAF callback
+        this.pendingHeading = null; // Store pending heading value
     }
 
     supportLogger(name,message) {
@@ -78,39 +81,75 @@ export class DeviceManager {
     }
 
     setHeading(heading) {
-        this.heading = parseFloat(heading.toFixed(2));
-        const marker = document.getElementById("heading-marker");
+        // Validate heading is a number
+        if (typeof heading !== 'number' || isNaN(heading)) {
+            console.warn('Invalid heading value:', heading);
+            return;
+        }
+
+        // Normalize heading to 0-360 range
+        const normalizedHeading = ((heading % 360) + 360) % 360;
+
+        // Calculate delta from last rotation angle for shortest path
+        let rotationAngle = this.lastRotationAngle;
+        let delta = normalizedHeading - (this.lastRotationAngle % 360);
         
-        if(!this.rotateMap) {
-            marker.style.transform = `rotate(${this.heading}deg)`;
+        if (delta > 180) {
+            delta -= 360;
+        } else if (delta < -180) {
+            delta += 360;
         }
-        else {
-            this.rotateLeafletMap(this.heading, marker);
+
+        // Filter out unrealistic jumps
+        // if (Math.abs(delta) > 45) {
+        //     console.warn(`Heading jump filtered: ${this.lastRotationAngle}° -> ${normalizedHeading}°`);
+        //     return;
+        // }
+
+        // Update rotation angle
+        rotationAngle += delta;
+        this.lastRotationAngle = rotationAngle;
+        this.heading = parseFloat(normalizedHeading.toFixed(2));
+
+        // Store the pending rotation value
+        this.pendingHeading = rotationAngle;
+
+        // Cancel any pending update and schedule a new one
+        if (this.pendingHeadingUpdate !== null) {
+            cancelAnimationFrame(this.pendingHeadingUpdate);
         }
+
+        // Use requestAnimationFrame to batch updates
+        this.pendingHeadingUpdate = requestAnimationFrame(() => {
+            if (this.pendingHeading !== null) {
+                const marker = document.getElementById("heading-marker");
+                
+                if(!this.rotateMap) {
+                    marker.style.transform = `rotate(${this.pendingHeading}deg)`;
+                }
+                else {
+                    this.rotateLeafletMap(this.pendingHeading, marker);
+                }
+            }
+            this.pendingHeadingUpdate = null;
+        });
     }
 
     rotateLeafletMap(deg, marker) {
-        const map = document.getElementById('map');
         const pane = document.querySelector('.leaflet-map-pane');
 
-        // Initialize to current heading on first rotation
+        if (!pane) return;
+
+        // Initialize transform-origin on first rotation
         if (!pane.hasAttribute('data-rotation-initialized')) {
             pane.setAttribute('data-rotation-initialized', 'true');
-            deg = this.heading;
+            pane.style.transformOrigin = 'center center';
         }
 
-        // Use map container center as fixed rotation point (prevents drift from panning)
-        const w = map.offsetWidth;
-        const h = map.offsetHeight;
-        const cx = w / 2;
-        const cy = h / 2;
+        // Apply rotation
+        pane.style.transform = `rotateZ(${-deg}deg)`;
 
-        pane.style.transform =
-            `translate3d(${cx}px, ${cy}px, 0)
-            rotateZ(${-deg}deg)
-            translate3d(${-cx}px, ${-cy}px, 0)`;
-
-        // Marker must rotate the opposite direction to stay aligned with the real world
+        // Marker rotates opposite direction
         if (marker) {
             marker.style.transform = `rotate(${deg}deg)`;
         }
@@ -197,16 +236,16 @@ export class DeviceManager {
         if (this.rotateMap) {
             icon.classList.remove("bi-compass");
             icon.classList.add("bi-compass-fill");
-            // Initialize map rotation to current heading
+            // Initialize map rotation
             const marker = document.getElementById("heading-marker");
-            this.rotateLeafletMap(this.heading, marker);
+            this.rotateLeafletMap(this.lastRotationAngle, marker);
         }
         else {
             icon.classList.remove("bi-compass-fill");
             icon.classList.add("bi-compass");
-            // Reset map and clear initialization flag
+            // Reset map
             const pane = document.querySelector('.leaflet-map-pane');
-            pane.style.transform = 'translate3d(0, 0, 0)';
+            pane.style.transform = 'none';
             pane.removeAttribute('data-rotation-initialized');
             const marker = document.getElementById("heading-marker");
             if (marker) {
