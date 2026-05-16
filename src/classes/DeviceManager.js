@@ -6,7 +6,7 @@ export class DeviceManager {
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
         this.lastRotationAngle = 0; // Tracks the actual rotation angle applied
-        this.headingUpdateThrottle = 100; // Minimum gap between heading updates in milliseconds
+        this.headingUpdateThrottle = 50; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
         this.pendingHeadingUpdate = null; // Track pending RAF callback
         this.pendingHeading = null; // Store pending heading value
@@ -136,14 +136,17 @@ export class DeviceManager {
     }
 
     rotateLeafletMap(deg, marker) {
+        const map = document.getElementById('map');
         const pane = document.querySelector('.leaflet-map-pane');
 
-        if (!pane) return;
+        if (!pane || !map) return;
 
-        // Initialize transform-origin on first rotation
+        // Initialize transform-origin to map center on first rotation
         if (!pane.hasAttribute('data-rotation-initialized')) {
             pane.setAttribute('data-rotation-initialized', 'true');
-            pane.style.transformOrigin = 'center center';
+            const centerX = map.offsetWidth / 2;
+            const centerY = map.offsetHeight / 2;
+            pane.style.transformOrigin = `${centerX}px ${centerY}px`;
         }
 
         // Apply rotation
