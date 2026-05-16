@@ -5,7 +5,8 @@ export class DeviceManager {
         this.rotateMap = false;
         this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
-        this.headingUpdateThrottle = 500; // Minimum gap between heading updates in milliseconds
+        this.lastRotationAngle = 0; // Tracks the actual rotation angle applied
+        this.headingUpdateThrottle = 50; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
         this.pendingHeadingUpdate = null; // Track pending RAF callback
         this.pendingHeading = null; // Store pending heading value
@@ -89,35 +90,45 @@ export class DeviceManager {
         // Normalize heading to 0-360 range
         const normalizedHeading = ((heading % 360) + 360) % 360;
 
-        // Filter out unrealistic jumps (likely sensor glitches)
-        // Allow up to 45 degree change per update (at 100ms throttle = 450°/sec max)
-        const headingDiff = Math.abs(normalizedHeading - this.heading);
-        const wrappedDiff = Math.min(headingDiff, 360 - headingDiff);
+        // Calculate delta from last rotation angle for shortest path
+        let rotationAngle = this.lastRotationAngle;
+        let delta = normalizedHeading - (this.lastRotationAngle % 360);
         
-        if (wrappedDiff > 45) {
-            console.warn(`Heading jump filtered: ${this.heading}° -> ${normalizedHeading}° (diff: ${wrappedDiff}°)`);
-            return;
+        if (delta > 180) {
+            delta -= 360;
+        } else if (delta < -180) {
+            delta += 360;
         }
 
-        // Store the pending heading value
-        this.pendingHeading = normalizedHeading;
+        // Filter out unrealistic jumps
+        // if (Math.abs(delta) > 45) {
+        //     console.warn(`Heading jump filtered: ${this.lastRotationAngle}° -> ${normalizedHeading}°`);
+        //     return;
+        // }
+
+        // Update rotation angle
+        rotationAngle += delta;
+        this.lastRotationAngle = rotationAngle;
+        this.heading = parseFloat(normalizedHeading.toFixed(2));
+
+        // Store the pending rotation value
+        this.pendingHeading = rotationAngle;
 
         // Cancel any pending update and schedule a new one
         if (this.pendingHeadingUpdate !== null) {
             cancelAnimationFrame(this.pendingHeadingUpdate);
         }
 
-        // Use requestAnimationFrame to batch updates and prevent queuing
+        // Use requestAnimationFrame to batch updates
         this.pendingHeadingUpdate = requestAnimationFrame(() => {
             if (this.pendingHeading !== null) {
-                this.heading = parseFloat(this.pendingHeading.toFixed(2));
                 const marker = document.getElementById("heading-marker");
                 
                 if(!this.rotateMap) {
-                    marker.style.transform = `rotate(${this.heading}deg)`;
+                    marker.style.transform = `rotate(${this.pendingHeading}deg)`;
                 }
                 else {
-                    this.rotateLeafletMap(this.heading, marker);
+                    this.rotateLeafletMap(this.pendingHeading, marker);
                 }
             }
             this.pendingHeadingUpdate = null;
@@ -128,24 +139,20 @@ export class DeviceManager {
         const map = document.getElementById('map');
         const pane = document.querySelector('.leaflet-map-pane');
 
-        // Initialize to current heading on first rotation
+        if (!pane || !map) return;
+
+        // Initialize transform-origin to map center on first rotation
         if (!pane.hasAttribute('data-rotation-initialized')) {
             pane.setAttribute('data-rotation-initialized', 'true');
-            deg = this.heading;
+            const centerX = map.offsetWidth / 2;
+            const centerY = map.offsetHeight / 2;
+            pane.style.transformOrigin = `${centerX}px ${centerY}px`;
         }
 
-        // Use map container center as fixed rotation point (prevents drift from panning)
-        const w = map.offsetWidth;
-        const h = map.offsetHeight;
-        const cx = w / 2;
-        const cy = h / 2;
+        // Apply rotation
+        pane.style.transform = `rotateZ(${-deg}deg)`;
 
-        pane.style.transform =
-            `translate3d(${cx}px, ${cy}px, 0)
-            rotateZ(${-deg}deg)
-            translate3d(${-cx}px, ${-cy}px, 0)`;
-
-        // Marker must rotate the opposite direction to stay aligned with the real world
+        // Marker rotates opposite direction
         if (marker) {
             marker.style.transform = `rotate(${deg}deg)`;
         }
@@ -232,16 +239,16 @@ export class DeviceManager {
         if (this.rotateMap) {
             icon.classList.remove("bi-compass");
             icon.classList.add("bi-compass-fill");
-            // Initialize map rotation to current heading
+            // Initialize map rotation
             const marker = document.getElementById("heading-marker");
-            this.rotateLeafletMap(this.heading, marker);
+            this.rotateLeafletMap(this.lastRotationAngle, marker);
         }
         else {
             icon.classList.remove("bi-compass-fill");
             icon.classList.add("bi-compass");
-            // Reset map and clear initialization flag
+            // Reset map
             const pane = document.querySelector('.leaflet-map-pane');
-            pane.style.transform = 'translate3d(0, 0, 0)';
+            pane.style.transform = 'none';
             pane.removeAttribute('data-rotation-initialized');
             const marker = document.getElementById("heading-marker");
             if (marker) {
