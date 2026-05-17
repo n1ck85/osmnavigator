@@ -8,7 +8,7 @@ export class DeviceManager {
         this.lastRotationAngle = 0; // Tracks the actual rotation angle applied
         this.headingUpdateThrottle = 50; // Minimum gap between heading updates in milliseconds
         this.lastHeadingUpdate = 0;
-        this.pendingHeadingUpdate = null; // Track pending RAF callback
+        this.pendingHeadingUpdate = null; // Track pending animation frame callback
         this.pendingHeading = null; // Store pending heading value
     }
 
@@ -101,10 +101,10 @@ export class DeviceManager {
         }
 
         // Filter out unrealistic jumps
-        // if (Math.abs(delta) > 45) {
-        //     console.warn(`Heading jump filtered: ${this.lastRotationAngle}° -> ${normalizedHeading}°`);
-        //     return;
-        // }
+        if (Math.abs(delta) > 60) {
+            console.warn(`Heading jump filtered: ${this.lastRotationAngle}° -> ${normalizedHeading}°`);
+            return;
+        }
 
         // Update rotation angle
         rotationAngle += delta;

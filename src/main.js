@@ -23,7 +23,7 @@ const navigationManager = new NavigationManager(mapManager, gpxManager, speechMa
 const uiManager = new UIManager(mapManager, gpxManager, navigationManager, deviceManager);
 
 // Pass managers to mapManager as mapManager is initialized first
-mapManager.setManagers([gpxManager, navigationManager]);
+mapManager.setManagers([gpxManager, navigationManager, deviceManager]);
 
 // Start location tracking
 navigationManager.startLocationTracking();

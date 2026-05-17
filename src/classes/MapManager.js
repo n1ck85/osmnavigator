@@ -10,6 +10,7 @@ export class MapManager {
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;
+        this.deviveManager = null;
         // this.polyline = null;
         this.gpxManager = null;
 
@@ -17,6 +18,10 @@ export class MapManager {
 
         this.map.addEventListener('dragstart', () => {
             this.navigationManager.stopFollowingUser();
+            // Disable map-rotation when user drags the map 
+            if(this.deviveManager.rotateMap) {
+                document.getElementById('map-rotate').click();
+            }
         });
 
         this.createButtonControl('gpx-upload', 'topleft', '<i class="bi bi-file-earmark-arrow-up"></i>', 'file');
@@ -31,6 +36,7 @@ export class MapManager {
     setManagers(managers) {
         this.gpxManager = managers[0];
         this.navigationManager = managers[1];
+        this.deviveManager = managers[2];
     }
 
     initializeMap() {
