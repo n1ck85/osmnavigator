@@ -39,6 +39,15 @@ export class MapManager {
         this.deviveManager = managers[2];
     }
 
+    centerTransformOriginToMarker(pane) {
+        if (!pane.hasAttribute('data-rotation-initialized')) {
+            pane.setAttribute('data-rotation-initialized', 'true');
+            const centerX = map.offsetWidth / 2;
+            const centerY = map.offsetHeight / 2;
+            pane.style.transformOrigin = `${centerX}px ${centerY}px`;
+        }
+    }
+
     initializeMap() {
         this.map = L.map(this.containerId).setView([0, 0], 17);
 

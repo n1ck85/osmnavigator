@@ -1,5 +1,6 @@
 export class DeviceManager {
-    constructor() {
+    constructor(mapManager) {
+        this.mapManager = mapManager;
         this.wakeLockSentinel = null;
         this.wakeLockActive = false;
         this.rotateMap = false;
@@ -149,12 +150,7 @@ export class DeviceManager {
         if (!pane || !map) return;
 
         // Initialize transform-origin to map center on first rotation
-        if (!pane.hasAttribute('data-rotation-initialized')) {
-            pane.setAttribute('data-rotation-initialized', 'true');
-            const centerX = map.offsetWidth / 2;
-            const centerY = map.offsetHeight / 2;
-            pane.style.transformOrigin = `${centerX}px ${centerY}px`;
-        }
+        this.mapManager.centerTransformOriginToMarker(pane);
 
         // Apply rotation
         pane.style.transform = `rotateZ(${-deg}deg)`;

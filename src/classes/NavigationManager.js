@@ -58,6 +58,13 @@ export class NavigationManager {
         this.lastKnownAccuracy = e.accuracy || 0;
         document.getElementById("accuracy-value").textContent = `${Math.round(e.accuracy)} meters`;
 
+        if (this.deviceManager.rotateMap) {
+            const pane = document.querySelector('.leaflet-map-pane');
+            // set transform-origin to map center if map rotation is on
+            this.mapManager.centerTransformOriginToMarker(pane);
+            console.log("centering to marker");
+        }
+
         if (this.isNavigating) {
             this.updateNavigation();
         }
@@ -92,11 +99,11 @@ export class NavigationManager {
 
         const trkpts = this.gpxManager.trackPoints;
         if (trkpts.length < 1) {
-            this.speechManager.speak("Route not found in the GPX file.");
+            this.speechManager.speak("Route not found.");
             return;
         }
 
-        this.trackThreshold = this.trackThreshold + (this.lastKnownAccuracy / 2);
+        //this.trackThreshold = this.trackThreshold + (this.lastKnownAccuracy / 2);
 
         const { latlng, distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
         if (distanceMeters > this.trackThreshold) {
@@ -114,6 +121,7 @@ export class NavigationManager {
         this.cumulativeDistances = this.computeCumulativeDistances(routePoints);
         this.segmentBearings = this.computeBearings(routePoints);
         this.turns = this.detectTurns(routePoints, this.segmentBearings, this.cumulativeDistances);
+        this.mapManager.map.setView(latlng, 16);
 
         console.log("Turns detected:", this.turns);
 
