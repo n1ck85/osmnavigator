@@ -10,6 +10,7 @@ export class DeviceManager {
         this.lastHeadingUpdate = 0;
         this.pendingHeadingUpdate = null; // Track pending animation frame callback
         this.pendingHeading = null; // Store pending heading value
+        this.lastHeadingFilterTime = 0; // Track when a heading jump was last filtered
     }
 
     supportLogger(name,message) {
@@ -100,10 +101,16 @@ export class DeviceManager {
             delta += 360;
         }
 
-        // Filter out unrealistic jumps
-        if (Math.abs(delta) > 60) {
-            console.warn(`Heading jump filtered: ${this.lastRotationAngle}° -> ${normalizedHeading}°`);
-            return;
+        // Filter out unrealistic jumps for 100ms
+        if (Math.abs(delta) > 45) {
+            const now = performance.now();
+            if (now - this.lastHeadingFilterTime < 100) {
+                // Still within the 100ms filter window, ignore this reading
+                return;
+            }
+            // 100ms has passed, allow the jump and reset the filter timer
+            this.lastHeadingFilterTime = now;
+            console.warn(`Heading jump detected: ${this.lastRotationAngle}deg -> ${normalizedHeading}deg`);
         }
 
         // Update rotation angle
