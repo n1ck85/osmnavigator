@@ -14,7 +14,7 @@ export class NavigationManager {
         this.offRoute = false;
         this.segmentBearings = null;
         this.turns = null;
-        this.minTurnSpacing = 0; // Minimum distance in meters between consecutive turns to avoid clutter
+        this.minTurnSpacing = 1; // Minimum distance in meters between consecutive turns to avoid clutter
         this.cumulativeDistances = null;
         this.turnState = {
             early: false,
@@ -36,7 +36,6 @@ export class NavigationManager {
             watch: true, 
             enableHighAccuracy: true,
             // minimumAge: 3000,
-            // setTimeout: 8000,
             setView: false, 
             maxZoom: 16 
         });
@@ -71,6 +70,7 @@ export class NavigationManager {
     }
 
     onLocationError(e) {
+        //alert("Error obtaining location: \r\n" + e.message);
         console.error(e.message);
     }
 
@@ -118,6 +118,7 @@ export class NavigationManager {
 
         this.isNavigating = true;
 
+        this.speechManager.speak("Navigation started");
         this.cumulativeDistances = this.computeCumulativeDistances(routePoints);
         this.segmentBearings = this.computeBearings(routePoints);
         this.turns = this.detectTurns(routePoints, this.segmentBearings, this.cumulativeDistances);
@@ -125,7 +126,6 @@ export class NavigationManager {
 
         console.log("Turns detected:", this.turns);
 
-        this.speechManager.speak("Navigation started");
 
         const navigateBtnIcon = document.querySelector("#navigate i");
         if (navigateBtnIcon) {
@@ -210,9 +210,21 @@ export class NavigationManager {
             const type = this.classifyTurn(angle);
             if (!type) continue;
 
+            //dissard turns that are too close to the previous turn to avoid clutter
+            if (cumulativeDistances[i] - (turns.at(-1)?.distanceFromStart || 0) < this.minTurnSpacing) {
+                //remove the previous turn too
+                if (turns.length > 0) {
+                    console.log("Removing turn at index", turns.at(-1)?.index, "due to proximity to next turn at index", i);
+                    turns.pop();
+                }
+                continue;
+            }
 
-            if (cumulativeDistances[i] - (turns.at(-1)?.distanceFromStart || 0) < this.minTurnSpacing)
-            continue;
+            // if a turn is exactly 180 degrees, its a mistake in the data so warn the user
+            if (Math.abs(angle) === 180) {
+                console.warn(`Turn at index ${i} is exactly 180 degrees, which is likely an error in the data.`);
+                // this.speechManager.speak(`Warning: 180 degree turn detected, check map.`);
+            }
 
             turns.push({
                 index: i,
@@ -263,8 +275,8 @@ export class NavigationManager {
         if (abs < 25) return null;
         if (abs < 60) return angle > 0 ? "slight right" : "slight left";
         if (abs < 120) return angle > 0 ? "right" : "left";
-        if (abs < 170) return angle > 0 ? "sharp right" : "sharp left";
-        return "u-turn";
+        if (abs < 179) return angle > 0 ? "sharp right" : "sharp left";
+        return "Warning: 180 degree turn detected, check map";
     }
 
     handleTurnLogic(progress) {
