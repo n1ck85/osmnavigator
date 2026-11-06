@@ -14,7 +14,8 @@ export class NavigationManager {
         this.offRoute = false;
         this.segmentBearings = null;
         this.turns = null;
-        this.minTurnSpacing = 20; // Minimum distance in meters between consecutive turns to avoid clutter
+        this.minTurnSpacing = 20; // Minimum distance in meters between consecutive turns to be ignored
+        this.maxShortUTurnDistance = 100; // Maximum distance in meters to consider a U-turn as a short loop to be ignored
         this.cumulativeDistances = null;
         this.turnState = {
             early: false,
@@ -201,14 +202,67 @@ export class NavigationManager {
         return 2 * R * Math.asin(Math.sqrt(h));
     }
 
+    detectShortUTurnIndices(points, bearings, cumulativeDistances) {
+        const shortUTurnIndices = new Set();
+        const loopClosureTolerance = this.minTurnSpacing;
+
+        for (let i = 1; i < bearings.length; i++) {
+            if (Math.abs(this.angleDelta(bearings[i - 1], bearings[i])) < 170) continue;
+
+            let shortestLoop = null;
+            for (let startIndex = i - 1;
+                startIndex >= 0 && cumulativeDistances[i] - cumulativeDistances[startIndex] <= this.maxShortUTurnDistance;
+                startIndex--) {
+                for (let endIndex = i + 1;
+                    endIndex < points.length &&
+                    cumulativeDistances[endIndex] - cumulativeDistances[startIndex] <= this.maxShortUTurnDistance;
+                    endIndex++) {
+                    const loopDistance = cumulativeDistances[endIndex] - cumulativeDistances[startIndex];
+                    if (loopDistance >= (shortestLoop?.loopDistance ?? Infinity)) continue;
+                    if (this.distance(points[startIndex], points[endIndex]) <= loopClosureTolerance) {
+                        shortestLoop = { startIndex, endIndex, loopDistance };
+                    }
+                }
+            }
+
+            if (shortestLoop) {
+                for (let turnIndex = shortestLoop.startIndex; turnIndex <= shortestLoop.endIndex; turnIndex++) {
+                    shortUTurnIndices.add(turnIndex);
+                }
+            }
+        }
+
+        return shortUTurnIndices;
+    }
+
     detectTurns(points, bearings, cumulativeDistances) {
         const turns = [];
+        const shortUTurnIndices = this.detectShortUTurnIndices(points, bearings, cumulativeDistances);
 
         // i is the vertex index; we need bearings[i-1] and bearings[i]
         for (let i = 1; i < bearings.length; i++) {
             const angle = this.angleDelta(bearings[i - 1], bearings[i]);
             const type = this.classifyTurn(angle);
             if (!type) continue;
+
+            if (shortUTurnIndices.has(i)) {
+                console.log("Skipping turn at route index", i, "because it is part of a short U-turn loop");
+
+                //###DEBUG####
+                // Mark the candidate being skipped, not the previously accepted turn.
+                const skippedTurn = points[i];
+                L.circleMarker([skippedTurn.lat, skippedTurn.lng], {
+                    color: 'red',
+                    radius: 6,
+                    fillOpacity: 0.5,
+                }).bindTooltip(`Turn at index ${i} skipped (short U-turn loop)`, {
+                    permanent: true,
+                    direction: 'top',
+                    className: 'removed-turn-tooltip'
+                }).addTo(this.mapManager.map);
+                //###END DEBUG####
+                continue;
+            }
 
             //dissard turns that are too close to the previous turn to avoid clutter
             if (cumulativeDistances[i] - (turns.at(-1)?.distanceFromStart || 0) < this.minTurnSpacing) {
