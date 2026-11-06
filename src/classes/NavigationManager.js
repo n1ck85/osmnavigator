@@ -14,7 +14,7 @@ export class NavigationManager {
         this.offRoute = false;
         this.segmentBearings = null;
         this.turns = null;
-        this.minTurnSpacing = 1; // Minimum distance in meters between consecutive turns to avoid clutter
+        this.minTurnSpacing = 20; // Minimum distance in meters between consecutive turns to avoid clutter
         this.cumulativeDistances = null;
         this.turnState = {
             early: false,
@@ -212,12 +212,23 @@ export class NavigationManager {
 
             //dissard turns that are too close to the previous turn to avoid clutter
             if (cumulativeDistances[i] - (turns.at(-1)?.distanceFromStart || 0) < this.minTurnSpacing) {
-                //remove the previous turn too
                 if (turns.length > 0) {
-                    console.log("Removing turn at index", turns.at(-1)?.index, "due to proximity to next turn at index", i);
-                    turns.pop();
+                    const previousTurn = turns.at(-1);
+                    console.log("Skipping turn at route index", i, "due to proximity to previous turn at route index", previousTurn.index);
+                    
+                    //###DEBUG####
+                    // Mark the candidate being skipped, not the previously accepted turn.
+                    const skippedTurn = points[i];
+                    L.circleMarker([skippedTurn.lat, skippedTurn.lng], {
+                        color: 'red',
+                        radius: 6,
+                        fillOpacity: 0.5,
+                    }).bindTooltip(`Turn skipped`, {permanent: true, direction: 'top', className: 'removed-turn-tooltip'
+                    }).addTo(this.mapManager.map);
+                      //###END DEBUG####  
+
+                    continue;
                 }
-                continue;
             }
 
             // if a turn is exactly 180 degrees, its a mistake in the data so warn the user
@@ -272,7 +283,7 @@ export class NavigationManager {
     classifyTurn(angle) {
         const abs = Math.abs(angle);
 
-        if (abs < 25) return null;
+        if (abs < 40) return null;
         if (abs < 60) return angle > 0 ? "slight right" : "slight left";
         if (abs < 120) return angle > 0 ? "right" : "left";
         if (abs < 179) return angle > 0 ? "sharp right" : "sharp left";
