@@ -1,3 +1,5 @@
+import { DEBUG } from '../config.js';
+
 export class UIManager {
     constructor(mapManager, gpxManager, navigationManager, deviceManager) {
         this.mapManager = mapManager;

@@ -1,3 +1,5 @@
+import { DEBUG } from '../config.js';
+
 export class NavigationManager {
     constructor(mapManager, gpxManager, speechManager, deviceManager) {
         this.mapManager = mapManager;
@@ -249,17 +251,19 @@ export class NavigationManager {
                 console.log("Skipping turn at route index", i, "because it is part of a short U-turn loop");
 
                 //###DEBUG####
-                // Mark the candidate being skipped, not the previously accepted turn.
-                const skippedTurn = points[i];
-                L.circleMarker([skippedTurn.lat, skippedTurn.lng], {
-                    color: 'red',
-                    radius: 6,
-                    fillOpacity: 0.5,
-                }).bindTooltip(`Turn at index ${i} skipped (short U-turn loop)`, {
-                    permanent: true,
-                    direction: 'top',
-                    className: 'removed-turn-tooltip'
-                }).addTo(this.mapManager.map);
+                if(DEBUG) {
+                    // Mark the candidate being skipped, not the previously accepted turn.
+                    const skippedTurn = points[i];
+                    L.circleMarker([skippedTurn.lat, skippedTurn.lng], {
+                        color: 'red',
+                        radius: 6,
+                        fillOpacity: 0.5,
+                    }).bindTooltip(`Turn at index ${i} skipped (short U-turn loop)`, {
+                        permanent: true,
+                        direction: 'top',
+                        className: 'removed-turn-tooltip'
+                    }).addTo(this.mapManager.map);
+                }
                 //###END DEBUG####
                 continue;
             }
@@ -271,6 +275,7 @@ export class NavigationManager {
                     console.log("Skipping turn at route index", i, "due to proximity to previous turn at route index", previousTurn.index);
                     
                     //###DEBUG####
+                    if(DEBUG) {
                     // Mark the candidate being skipped, not the previously accepted turn.
                     const skippedTurn = points[i];
                     L.circleMarker([skippedTurn.lat, skippedTurn.lng], {
@@ -279,6 +284,7 @@ export class NavigationManager {
                         fillOpacity: 0.5,
                     }).bindTooltip(`Turn skipped`, {permanent: true, direction: 'top', className: 'removed-turn-tooltip'
                     }).addTo(this.mapManager.map);
+                    }
                       //###END DEBUG####  
 
                     continue;

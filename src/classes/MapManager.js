@@ -1,3 +1,4 @@
+import { DEBUG } from '../config.js';
 import 'leaflet';
 import 'leaflet-gpx';
 import TileUtil from './utils/TileUtil.js';

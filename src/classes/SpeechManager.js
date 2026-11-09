@@ -1,3 +1,5 @@
+import { DEBUG } from '../config.js';
+
 export class SpeechManager {
     constructor() {
         this.loadVoices();

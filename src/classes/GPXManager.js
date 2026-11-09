@@ -1,3 +1,5 @@
+import { DEBUG } from '../config.js';
+
 export class GPXManager {
     constructor(mapManager, deviceManager) {
         this.mapManager = mapManager;
