@@ -21,12 +21,21 @@ export class UIManager {
         document.getElementById('mapCachingSwitch').addEventListener('change', (e) => {
             this.deviceManager.savePreference('mapCachingEnabled', e.target.checked);
         });
+        document.getElementById('turnDistanceBufferInput').addEventListener('change', (e) => {
+            this.deviceManager.savePreference('turnDistanceBuffer', e.target.value);
+        });
     }
 
     setSavedPreferences() {
         const mapCachingEnabled = this.deviceManager.getPreference('mapCachingEnabled');
         if (mapCachingEnabled !== null) {
             document.getElementById('mapCachingSwitch').checked = mapCachingEnabled;
+        }
+
+        const turnDistanceBuffer = this.deviceManager.getPreference('turnDistanceBuffer');
+        if (turnDistanceBuffer !== null) {
+            this.navigationManager.turnDistanceBuffer = parseFloat(turnDistanceBuffer);
+            document.getElementById('turnDistanceBufferInput').value = turnDistanceBuffer;
         }
     }
 }

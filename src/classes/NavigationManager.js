@@ -15,10 +15,14 @@ export class NavigationManager {
         //this.lastUpdateTime = 0;
         this.offRoute = false;
         this.segmentBearings = null;
-        this.turns = null;
         this.minTurnSpacing = 20; // Minimum distance in meters between consecutive turns to be ignored
         this.maxShortUTurnDistance = 100; // Maximum distance in meters to consider a U-turn as a short loop to be ignored
         this.cumulativeDistances = null;
+        this.turns = null;
+        this.turnStateEarlyDistance = 80; // Distance in meters to give early turn alert
+        this.turnStateNearDistance = 40; // Distance in meters to give near turn alert
+        this.turnStateNowDistance = 10; // Distance in meters to give now turn alert
+        this.turnDistanceBuffer = 0; // Buffer distance in meters to offset turn alerts for different speeds or travel
         this.turnState = {
             early: false,
             near: false,
@@ -369,17 +373,17 @@ export class NavigationManager {
             };
         }
 
-        if (distToTurn < 80 && !this.turnState.early) {
+        if (distToTurn < (this.turnDistanceBuffer + this.turnStateEarlyDistance) && !this.turnState.early) {
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.early = true;
         }
 
-        if (distToTurn < 40 && !this.turnState.near) {
+        if (distToTurn < (this.turnDistanceBuffer + this.turnStateNearDistance) && !this.turnState.near) {
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.near = true;
         }
 
-        if (distToTurn < 10 && !this.turnState.now) {
+        if (distToTurn < (this.turnDistanceBuffer + this.turnStateNowDistance) && !this.turnState.now) {
             this.speechManager.speak(`Now ${nextTurn.type}`);
             this.turnState.now = true;
         }
