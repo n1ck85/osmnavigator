@@ -6,11 +6,11 @@ export class MapManager {
     constructor(containerId) {
         this.tileLayerUrl = 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=MCXdEISVVJdUnViMkSeS';
         this.map = null;
-        this.containerId = 'map';
+        this.containerId = containerId || 'map';
         this.userMarker = null;
         this.accuracyCircle = null;
         this.navigationManager = null;
-        this.deviveManager = null;
+        this.deviceManager = null;
         // this.polyline = null;
         this.gpxManager = null;
 
@@ -19,7 +19,7 @@ export class MapManager {
         this.map.addEventListener('dragstart', () => {
             this.navigationManager.stopFollowingUser();
             // Disable map-rotation when user drags the map 
-            if(this.deviveManager.rotateMap) {
+            if(this.deviceManager.rotateMap) {
                 document.getElementById('map-rotate').click();
             }
         });
@@ -36,7 +36,7 @@ export class MapManager {
     setManagers(managers) {
         this.gpxManager = managers[0];
         this.navigationManager = managers[1];
-        this.deviveManager = managers[2];
+        this.deviceManager = managers[2];
     }
 
     centerTransformOriginToMarker(pane) {
