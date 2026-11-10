@@ -83,6 +83,7 @@ export class NavigationManager {
 
     startNavigation() {
         if (this.isNavigating) {
+            this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-x-octagon"></i></div><div><span>Navigation stopped</span></div>', 5000);
             this.speechManager.speak("Navigation stopped");
             this.isNavigating = false;
             this.offRoute = false;
@@ -116,6 +117,7 @@ export class NavigationManager {
         if (distanceMeters > this.trackThreshold) {
             this.isNavigating = false;
             console.log("Too far from route", `You are ${Math.round(distanceMeters)} meters from the route.`);
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-emoji-frown"></i></div><div><span>Navigation stopped. You are ${Math.round(distanceMeters)} meters away from the route.</span></div>`, 5000);
             this.speechManager.speak(`Navigation stopped. You are too far from the route.`);
             return;
         }
@@ -125,6 +127,7 @@ export class NavigationManager {
 
         this.isNavigating = true;
 
+        this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-emoji-laughing"></i></div><div><span>Navigation started</span></div>', 5000);
         this.speechManager.speak("Navigation started");
         this.cumulativeDistances = this.computeCumulativeDistances(routePoints);
         this.segmentBearings = this.computeBearings(routePoints);
@@ -140,7 +143,9 @@ export class NavigationManager {
             navigateBtnIcon.classList.add("bi-signpost-split-fill");
         }
 
-        this.updateNavigation();
+        setTimeout(() => {
+            this.updateNavigation();
+        }, 5000);
     }
 
     updateNavigation() {
@@ -155,6 +160,7 @@ export class NavigationManager {
             if (!this.offRoute) {
                 this.offRoute = true;
                 console.log("Off route", `You are ${Math.round(distanceOffRoute)} meters away.`);
+                this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-emoji-frown"></i></div><div><span>Off route, You are ${Math.round(distanceOffRoute)} meters away from the route.</span></div>`, 5000); 
                 this.speechManager.speak(`Off route. You are ${Math.round(distanceOffRoute)} meters from the route.`);
             }
             return;
@@ -162,6 +168,7 @@ export class NavigationManager {
             if (this.offRoute) { 
                 this.offRoute = false;
                 console.log("On route", `You are back on route.`);
+                this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-emoji-laughing"></i></div><div><span>You are back on route.</span></div>`, 5000);
                 this.speechManager.speak(`You are back on route.`);
             }
         }
@@ -373,17 +380,22 @@ export class NavigationManager {
             };
         }
 
+        const nextTurnIcon = nextTurn.type.replace(" ", "-").replace("slight", "up-").replace("sharp", "down-");
+
         if (distToTurn < (this.turnDistanceBuffer + this.turnStateEarlyDistance) && !this.turnState.early) {
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square"></i></div><div><span>In ${Math.round(distToTurn)} meters, ${nextTurn.type}</span></div>`, 5000);
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.early = true;
         }
 
         if (distToTurn < (this.turnDistanceBuffer + this.turnStateNearDistance) && !this.turnState.near) {
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square"></i></div><div><span>In ${Math.round(distToTurn)} meters, ${nextTurn.type}</span></div>`, 5000);
             this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
             this.turnState.near = true;
         }
 
         if (distToTurn < (this.turnDistanceBuffer + this.turnStateNowDistance) && !this.turnState.now) {
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square"></i></div><div><span>Now ${nextTurn.type}</span></div>`, 5000);
             this.speechManager.speak(`Now ${nextTurn.type}`);
             this.turnState.now = true;
         }

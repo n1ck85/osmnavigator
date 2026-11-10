@@ -14,6 +14,7 @@ export class MapManager {
         this.deviceManager = null;
         // this.polyline = null;
         this.gpxManager = null;
+        this.infoBoxes = {};
 
        this.initializeMap();
 
@@ -118,24 +119,56 @@ export class MapManager {
         this.map.addControl(new ButtonControl());
     }
 
-    createInfoBox(id, position, content) {
+    createInfoBox(id, position, content, timeout) {
+        console.log(`Creating info box with ID: ${id}, position: ${position}, content: ${content}, timeout: ${timeout}`);
+        // Remove any existing box with this ID
+        if (this.infoBoxes[id]) {
+            this.map.removeControl(this.infoBoxes[id]);
+            delete this.infoBoxes[id];
+        }
+
         const InfoControl = L.Control.extend({
             options: {
-                position: position
+                position
             },
+
             onAdd: function () {
-                const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                const container = L.DomUtil.create(
+                    'div',
+                    'leaflet-bar leaflet-control'
+                );
+
                 const info = L.DomUtil.create('div', '', container);
+
+                info.id = id;
                 info.innerHTML = content;
                 info.style.backgroundColor = 'white';
                 info.style.padding = '1px 2px';
                 info.style.borderRadius = '4px';
-                info.id = id;
+
                 return container;
             }
         });
 
-        this.map.addControl(new InfoControl());
+        const infoBox = new InfoControl();
+
+        this.infoBoxes[id] = infoBox;
+
+        this.map.addControl(infoBox);
+
+        if (timeout) {
+            setTimeout(() => {
+
+                // Only remove if this is still the active box
+                if (this.infoBoxes[id] === infoBox) {
+                    this.map.removeControl(infoBox);
+                    delete this.infoBoxes[id];
+                }
+
+            }, timeout);
+        }
+
+        return infoBox;
     }
 
     updateUserMarker(latlng, accuracy) {

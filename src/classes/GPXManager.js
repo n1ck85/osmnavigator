@@ -15,6 +15,12 @@ export class GPXManager {
         const file = e.target.files[0];
         if (!file) return;
 
+        //stop navigation if active
+        if (this.mapManager.navigationManager.isNavigating) {
+            //triggering startNavigation will cause the app to stop navigation if it's already active
+            this.mapManager.navigationManager.startNavigation();
+        }
+
         const blobUrl = URL.createObjectURL(file);
         this.createPolyline(blobUrl);
 

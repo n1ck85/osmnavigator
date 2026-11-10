@@ -75,3 +75,26 @@
   border-bottom: 12px solid #4285f4;
   transform-origin: center bottom;
 }
+
+#navigation-update {
+  display: flex;
+  align-items: center;
+  max-width: 50vw;
+
+  div {
+    padding: .5em;
+  }
+
+  span {
+      display: inline-block;
+      font-size: 1.4em;
+      font-family: system-ui, sans-serif;
+      font-weight: 600;
+  }
+
+  i {
+    font-size: 5em;
+    line-height: 1;
+    color: var(--bs-gray-600);
+  }
+}
