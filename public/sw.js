@@ -1,6 +1,6 @@
 const VERSION = "v7";
 const STATIC_CACHE = `osmnav-static-${VERSION}`;
-const RUNTIME_CACHE = `osmnav-runtime-${VERSION}`;
+const RUNTIME_CACHE = `osmnav-map-data-${VERSION}`;
 
 const IS_DEV = self.location.hostname === "localhost";
 const BASE = self.location.pathname.replace(/sw\.js$/, "");
@@ -86,36 +86,62 @@ async function trimCache(name, maxItems) {
 self.addEventListener("message", async event => {
   if (event.data?.type !== "CACHE_TILES") return;
   const { tiles } = event.data;
-  const cache = await caches.open(RUNTIME_CACHE);
+  event.waitUntil((async () => {
+    const cache = await caches.open(RUNTIME_CACHE);
 
-  for (let i = 0; i < tiles.length; i++) {
-    let url = tiles[i];
-    if (url.startsWith("/")) url = "https://api.maptiler.com" + url;
-    const cleanUrl = url.split('?')[0];
+    for (let i = 0; i < tiles.length; i++) {
+      let url = tiles[i];
+      if (url.startsWith("/")) url = "https://api.maptiler.com" + url;
+      const cleanUrl = url.split('?')[0];
 
-    try {
-      if (await cache.match(cleanUrl)) continue;
-
-      // Use CORS mode. This allows the browser to see the real file size.
-      // If MapTiler throws a CORS error, change mode to 'no-cors'.
-      const res = await fetch(url, { mode: 'cors' });
-
-      if (res.ok && res.headers.get("content-type")?.includes("image")) {
-        await cache.put(cleanUrl, res.clone());
+      try {
+        if (!(await cache.match(cleanUrl))) {
+          await fetchAndCacheTile(url, cleanUrl, cache);
+        }
+      } catch (err) {
+        console.warn("Tile fetch failed:", url, err);
       }
 
-      // Progress
       const clients = await self.clients.matchAll();
       clients.forEach(c => c.postMessage({
         type: "TILE_CACHE_PROGRESS",
         index: i + 1, total: tiles.length,
         percent: Math.round(((i + 1) / tiles.length) * 100)
       }));
+    }
+  })());
+});
+
+async function fetchAndCacheTile(url, cleanUrl, cache) {
+  while (true) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    try {
+      // Include cache.put in the timeout so a stalled response body is retried too.
+      const res = await fetch(url, { mode: 'cors', signal: controller.signal });
+
+      if (res.status === 429 || res.status === 503) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        continue;
+      }
+
+      if (!res.ok || !res.headers.get("content-type")?.includes("image")) {
+        console.warn("Tile server returned an invalid response:", url, res.status);
+        return;
+      }
+
+      await cache.put(cleanUrl, res.clone());
+      return;
     } catch (err) {
-      console.warn("Tile fetch failed:", url);
+      if (err.name !== "AbortError") throw err;
+      console.warn("Tile transfer stalled for 5 seconds; retrying:", url);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } finally {
+      clearTimeout(timeout);
     }
   }
-});
+}
 
 // --- HANDLERS ---
 function handleNavigation(req) {

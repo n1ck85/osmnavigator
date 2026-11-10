@@ -65,7 +65,8 @@ export class GPXManager {
 
             this.mapManager.map.fitBounds(e.target.getBounds());
 
-            if(this.deviceManager.getPreference('mapCachingEnabled')) { 
+            if(this.deviceManager.getPreference('mapCachingEnabled') || this.deviceManager.getPreference('mapCachingEnabled') === null) {
+                this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-cloud-arrow-down"></i></div><div><span>Caching map tiles for route...</span></div>', 5000); 
                 this.mapManager.cacheTilesForBounds(e.target.getBounds());
             }
             // this.createTrkptMarkers();
