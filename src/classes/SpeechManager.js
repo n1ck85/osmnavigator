@@ -23,6 +23,9 @@ export class SpeechManager {
         //speech throttling
         if(this.lastMsg === text && now - this.lastMsgTime < this.msgThrottle) return;
         
+        msg.rate = 1.8;
+        msg.pitch = .6;
+
         this.lastMsgTime = performance.now();
         this.lastMsg = text;
         const voices = speechSynthesis.getVoices();

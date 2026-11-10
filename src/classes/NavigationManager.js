@@ -127,7 +127,7 @@ export class NavigationManager {
 
         this.isNavigating = true;
 
-        this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-emoji-laughing"></i></div><div><span>Navigation started</span></div>', 5000);
+        this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-emoji-sunglasses"></i></div><div><span>Navigation started</span></div>', 5000);
         this.speechManager.speak("Navigation started");
         this.cumulativeDistances = this.computeCumulativeDistances(routePoints);
         this.segmentBearings = this.computeBearings(routePoints);
@@ -168,7 +168,7 @@ export class NavigationManager {
             if (this.offRoute) { 
                 this.offRoute = false;
                 console.log("On route", `You are back on route.`);
-                this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-emoji-laughing"></i></div><div><span>You are back on route.</span></div>`, 5000);
+                this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-emoji-sunglasses"></i></div><div><span>You are back on route.</span></div>`, 5000);
                 this.speechManager.speak(`You are back on route.`);
             }
         }

@@ -120,7 +120,6 @@ export class MapManager {
     }
 
     createInfoBox(id, position, content, timeout) {
-        console.log(`Creating info box with ID: ${id}, position: ${position}, content: ${content}, timeout: ${timeout}`);
         // Remove any existing box with this ID
         if (this.infoBoxes[id]) {
             this.map.removeControl(this.infoBoxes[id]);
