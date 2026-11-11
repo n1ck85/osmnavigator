@@ -45,14 +45,14 @@ export class GPXManager {
                 startIcon: L.divIcon({
                     html: '<i class="bi bi-geo-alt-fill text-success"></i>',
                     className: 'gpx-marker gpx-start',
-                    // iconSize: [32, 32],
-                    // iconAnchor: [16, 16]
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
                 }),
                 endIcon: L.divIcon({
                     html: '<i class="bi bi-geo-alt-fill text-danger"></i>',
                     className: 'gpx-marker gpx-end',
-                    // iconSize: [32, 32],
-                    // iconAnchor: [16, 16]
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
                 })
             },
             // marker_options: {
