@@ -57,14 +57,20 @@ export class MapManager {
     initializeMap() {
         this.map = L.map(this.containerId).setView([0, 0], 17);
 
-        // Create a MapTiler Layer inside Leaflet
-        new MaptilerLayer({
+        // Create a MapTiler vector layer inside Leaflet
+        const layer = new MaptilerLayer({
             style: this.mapStyle,
             apiKey: this.mapTilerApiKey,
             maxZoom: 19,
             maxNativeZoom: 16,
             minZoom: 6,
         }).addTo(this.map);
+
+        //remove maplibre attribution control
+        const attribControl = layer._maptilerMap._controls.find(
+            c => c._container?.classList?.contains('maplibregl-ctrl-attrib')
+        );
+        attribControl && layer._maptilerMap.removeControl(attribControl);
     }
 
     createUserMarker(latlng) {
