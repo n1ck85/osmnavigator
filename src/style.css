@@ -100,8 +100,7 @@
   }
 }
 
-
- .gpx-marker.gpx-start, .gpx-marker.gpx-end {
+.gpx-marker.gpx-start, .gpx-marker.gpx-end {
   i {
     position: relative;
     top: -16px;
