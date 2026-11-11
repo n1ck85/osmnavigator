@@ -42,16 +42,26 @@ export class GPXManager {
                 className: 'route-line'
             },
             markers: {
-                startIcon: 'assets/icons/pin-icon-start.png',
-                endIcon: 'assets/icons/pin-icon-end.png',
+                startIcon: L.divIcon({
+                    html: '<i class="bi bi-geo-alt-fill text-success"></i>',
+                    className: 'gpx-marker gpx-start',
+                    // iconSize: [32, 32],
+                    // iconAnchor: [16, 16]
+                }),
+                endIcon: L.divIcon({
+                    html: '<i class="bi bi-geo-alt-fill text-danger"></i>',
+                    className: 'gpx-marker gpx-end',
+                    // iconSize: [32, 32],
+                    // iconAnchor: [16, 16]
+                })
             },
-            marker_options: {
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                shadowUrl: 'assets/icons/pin-shadow.png',
-                shadowSize: [40, 20],
-                shadowAnchor: [12, 20]
-            }
+            // marker_options: {
+            //     iconSize: [32, 32],
+            //     iconAnchor: [16, 32],
+            //     shadowUrl: 'assets/icons/pin-shadow.png',
+            //     shadowSize: [40, 20],
+            //     shadowAnchor: [12, 20]
+            // }
         })
         .on('loaded', async (e) => {         
             //extract the trackpoints form the file and save
@@ -66,7 +76,7 @@ export class GPXManager {
             this.mapManager.map.fitBounds(e.target.getBounds());
 
             if(this.deviceManager.getPreference('mapCachingEnabled') || this.deviceManager.getPreference('mapCachingEnabled') === null) {
-                this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-cloud-arrow-down"></i></div><div><span>Caching map tiles for route...</span></div>', 5000); 
+                this.mapManager.createInfoBox('navigation-update', 'topright', '<div><i class="bi bi-cloud-arrow-down-fill text-info"></i></div><div><span>Caching map tiles for route...</span></div>', 5000); 
                 this.mapManager.cacheTilesForBounds(e.target.getBounds());
             }
             // this.createTrkptMarkers();

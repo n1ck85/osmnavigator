@@ -53,7 +53,7 @@ export default class TileUtil {
         tiles: urls
       });
 
-      // Initiate the listeener but prevent duplicate listeners
+      // Initiate the listener but prevent duplicate listeners
       if (!TileUtil._listenerAdded) {
         TileUtil._listenerAdded = true;
         TileUtil.listenForTileCacheResponse();
@@ -62,7 +62,7 @@ export default class TileUtil {
   }
 
   static listenForTileCacheResponse() {
-    navigator.serviceWorker.addEventListener("message", event => { //console.log('triggered');
+    navigator.serviceWorker.addEventListener("message", event => {
       if (event.data?.type === "TILE_CACHE_PROGRESS") {
         const { percent, index, total } = event.data;
         TileUtil.updateProgress(percent);
@@ -78,15 +78,18 @@ export default class TileUtil {
     if (!bar) return;
 
     if(percent === 100) {
-      setTimeout(function() { parent.style.display = 'none' }, 3000);
+      setTimeout(function() { parent.style.display = 'none' }, 1000);
     }
     else {
       parent.style.display = 'block';
     }
 
-    bar.style.width = percent + '%';
+    // bar.style.width = percent + '%';
+    bar.style.color = 'black';
+    bar.style.fontWeight = 'bold';
+    bar.style.fontSize = '8px';
     bar.setAttribute('aria-valuenow', percent);
-    // bar.textContent = percent + '%';
+    bar.textContent = percent + '%';
   }
 
 }
