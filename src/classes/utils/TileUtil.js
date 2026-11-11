@@ -71,7 +71,7 @@ export default class TileUtil {
   }
 
   static updateProgress(percent) {
-    const parent = document.getElementById('progress');
+    const parent = document.getElementById('cache-progress');
     if (!parent) return;
 
     const bar = parent.querySelector('.progress-bar');
@@ -84,12 +84,12 @@ export default class TileUtil {
       parent.style.display = 'block';
     }
 
-    // bar.style.width = percent + '%';
-    bar.style.color = 'black';
-    bar.style.fontWeight = 'bold';
-    bar.style.fontSize = '8px';
+    bar.style.width = percent + '%';
+    //bar.style.color = 'black';
+    //bar.style.fontWeight = 'bold';
+    //bar.style.fontSize = '8px';
     bar.setAttribute('aria-valuenow', percent);
-    bar.textContent = percent + '%';
+    //bar.textContent = percent + '%';
   }
 
 }

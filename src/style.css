@@ -34,8 +34,9 @@
   animation: route-move 2s linear infinite;
 }
 
-#progress {
+#cache-progress {
     display: none;
+    height: 10px;
 }
 .progress, .progress-bar {
   border-radius: 0;
