@@ -1,6 +1,8 @@
 import { DEBUG } from '../config.js';
 import 'leaflet';
+import { MaptilerLayer } from "@maptiler/leaflet-maptilersdk";
 import 'leaflet-gpx';
+
 import TileUtil from './utils/TileUtil.js';
 
 export class MapManager {
@@ -53,16 +55,13 @@ export class MapManager {
     initializeMap() {
         this.map = L.map(this.containerId).setView([0, 0], 17);
 
-        L.tileLayer(this.tileLayerUrl, {
+        // Create a MapTiler Layer inside Leaflet
+        new MaptilerLayer({
+            style: "outdoor-v2",
+            apiKey: "MCXdEISVVJdUnViMkSeS",
             maxZoom: 19,
             maxNativeZoom: 16,
             minZoom: 6,
-            attribution: 
-               `<a href="https://www.maptiler.com">
-                <img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo">
-                </a>
-                <br>
-                © OpenStreetMap contributors`
         }).addTo(this.map);
     }
 
