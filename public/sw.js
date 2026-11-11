@@ -126,8 +126,8 @@ async function fetchAndCacheTile(url, cleanUrl, cache) {
         continue;
       }
 
-      if (!res.ok || !res.headers.get("content-type")?.includes("image")) {
-        console.warn("Tile server returned an invalid response:", url, res.status);
+      if (!isSuccessfulTileResponse(res)) {
+        console.warn("Tile server returned an invalid tile response:", url, res.status);
         return;
       }
 
@@ -166,7 +166,18 @@ function handleStatic(req) {
 }
 
 function isTile(url) {
-  return url.hostname.includes("maptiler") && /\/\d+\/\d+\/\d+\.(png|jpg|webp)/.test(url.pathname);
+  return url.hostname === "api.maptiler.com" &&
+    /\/(?:tiles\/[^/]+|maps\/[^/]+)\/\d+\/\d+\/\d+(?:\.(?:png|jpg|jpeg|webp|pbf))?$/.test(url.pathname);
+}
+
+function isSuccessfulTileResponse(res) {
+  if (!res.ok) return false;
+
+  const contentType = res.headers.get("content-type")?.toLowerCase() || "";
+  return contentType.includes("image") ||
+    contentType.includes("protobuf") ||
+    contentType.includes("mapbox-vector-tile") ||
+    contentType.includes("octet-stream");
 }
 
 function handleTile(req) {
@@ -177,9 +188,7 @@ function handleTile(req) {
 
     try {
       const res = await fetch(req);
-      // Only cache if it's a valid image. 
-      // Avoids caching error pages or JSON metadata as "tiles"
-      if (res.ok && res.headers.get("content-type")?.includes("image")) {
+      if (isSuccessfulTileResponse(res)) {
         cache.put(cleanUrl, res.clone());
         trimCache(RUNTIME_CACHE, 10000); // Keep runtime cache lean
       }

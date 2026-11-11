@@ -7,7 +7,9 @@ import TileUtil from './utils/TileUtil.js';
 
 export class MapManager {
     constructor(containerId) {
-        this.tileLayerUrl = 'https://api.maptiler.com/maps/openstreetmap/{z}/{x}/{y}.jpg?key=MCXdEISVVJdUnViMkSeS';
+        this.mapStyle = 'outdoor-v2';
+        this.tileSetId = 'outdoor';
+        this.mapTilerApiKey = 'MCXdEISVVJdUnViMkSeS';
         this.map = null;
         this.containerId = containerId || 'map';
         this.userMarker = null;
@@ -57,8 +59,8 @@ export class MapManager {
 
         // Create a MapTiler Layer inside Leaflet
         new MaptilerLayer({
-            style: "outdoor-v2",
-            apiKey: "MCXdEISVVJdUnViMkSeS",
+            style: this.mapStyle,
+            apiKey: this.mapTilerApiKey,
             maxZoom: 19,
             maxNativeZoom: 16,
             minZoom: 6,
@@ -262,7 +264,7 @@ export class MapManager {
         const minZoom = this.map.getMinZoom(); //10
         const maxZoom = /*this.map.getMaxZoom();*/16;
         //console.log(minZoom,maxZoom);
-        const template = this.tileLayerUrl; 
+        const template = `https://api.maptiler.com/tiles/${this.tileSetId}/{z}/{x}/{y}?key=${this.mapTilerApiKey}`;
 
         const urls = TileUtil.generateForAllZooms(bounds, minZoom, maxZoom, template);
         
