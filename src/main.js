@@ -27,4 +27,8 @@ mapManager.setManagers([gpxManager, navigationManager, deviceManager]);
 
 // Start location tracking
 navigationManager.startLocationTracking();
-deviceManager.startOrientationTracking();
+
+// Start orientation tracking if useCompass preference is true or not set
+if (deviceManager.getPreference('useCompass') || deviceManager.getPreference('useCompass') === null) {
+  deviceManager.startOrientationTracking();
+}

@@ -20,10 +20,6 @@
   /* transition: transform 0.1s linear; */
 }
 
-#heading-marker {
-  transition: transform 0.1s linear;
-} 
-
 #device-support-log {
   font-size: 0.8em;
   overflow-y: auto;
@@ -53,7 +49,8 @@
 }
 
 /* Outer circle */
-.my-location {
+#heading-marker {
+  transition: transform 0.1s linear;
   width: 32px;
   height: 32px;
   border: 3px dotted #4285f4;
@@ -63,18 +60,18 @@
 }
 
 /* Direction arrow */
-.my-location::after {
-  content: "";
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 12px solid #4285f4;
-  transform-origin: center bottom;
+.orientation-active::after {
+    content: "";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 12px solid #4285f4;
+    transform-origin: center bottom;
 }
 
 #navigation-update {

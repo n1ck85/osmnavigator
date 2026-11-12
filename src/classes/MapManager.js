@@ -74,9 +74,12 @@ export class MapManager {
     }
 
     createUserMarker(latlng) {
+        const orientationClass = this.deviceManager.getPreference('useCompass') === false
+            ? ''
+            : 'orientation-active';
         const headingIcon = L.divIcon({
             className: "",
-            html: `<div id="heading-marker" class="my-location"></div>`,
+            html: `<div id="heading-marker" class="my-location ${orientationClass}"></div>`,
             iconSize: [32, 32],
             iconAnchor: [16, 16]
         });

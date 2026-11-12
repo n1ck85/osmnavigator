@@ -24,6 +24,9 @@ export class UIManager {
         document.getElementById('turnDistanceBufferInput').addEventListener('change', (e) => {
             this.deviceManager.savePreference('turnDistanceBuffer', e.target.value);
         });
+        document.getElementById('useCompassSwitch').addEventListener('change', (e) => {
+            this.deviceManager.savePreference('useCompass', e.target.checked);
+        });
     }
 
     setSavedPreferences() {
@@ -36,6 +39,11 @@ export class UIManager {
         if (turnDistanceBuffer !== null) {
             this.navigationManager.turnDistanceBuffer = parseFloat(turnDistanceBuffer);
             document.getElementById('turnDistanceBufferInput').value = turnDistanceBuffer;
+        }
+
+        const useCompass = this.deviceManager.getPreference('useCompass');
+        if (useCompass !== null) {
+            document.getElementById('useCompassSwitch').checked = useCompass;
         }
     }
 }
