@@ -76,8 +76,7 @@ export class DeviceManager {
             // Android: use absolute orientation to calculate heading
             if(event.alpha !== null) {
                 //this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${event.alpha.toFixed(2)}°`);
-                const screenAngle = screen.orientation ? screen.orientation.angle : (window.orientation || 0);
-                this.setHeading((360 - event.alpha - 90 - screenAngle) % 360);
+                this.setHeading((360 - event.alpha) % 360);
             }
             else {
                 this.supportLogger("Magnetic Heading", "Device orientation not available");
