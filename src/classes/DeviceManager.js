@@ -73,18 +73,20 @@ export class DeviceManager {
         if (now - this.lastHeadingUpdate < this.headingUpdateThrottle) return;
         this.lastHeadingUpdate = now;
 
-        if (event.webkitCompassHeading) {
-            // iOS gives true compass heading
-            this.setHeading(event.webkitCompassHeading);
-        } else {
-            // Android: use absolute orientation to calculate heading
-            if(event.alpha !== null) {
-                //this.supportLogger("Magnetic Heading", `Device orientation absolute alpha: ${event.alpha.toFixed(2)}°`);
-                this.setHeading((360 - event.alpha) % 360);
-            }
-            else {
-                this.supportLogger("Magnetic Heading", "Device orientation not available");
-            }
+        let heading = null;
+
+        // iOS: webkitCompassHeading is always present and is the true compass bearing
+        if (event.webkitCompassHeading != null) {
+            heading = event.webkitCompassHeading;
+        }
+        // Android/Chromium: only trust the event if it's actually absolute
+        else if (event.absolute && event.alpha != null) {
+            heading = (360 - event.alpha) % 360;
+        }
+        // Relative event (event.absolute === false) → ignore it
+
+        if (heading !== null) {
+            setHeading(heading);
         }
     }
 
