@@ -1,4 +1,5 @@
 import { DEBUG } from '../config.js';
+import { HeadingTracker } from './HeadingTracker.js'; // adjust path
 
 export class DeviceManager {
     constructor(mapManager) {
@@ -6,14 +7,16 @@ export class DeviceManager {
         this.wakeLockSentinel = null;
         this.wakeLockActive = false;
         this.rotateMap = false;
-        this.getHeading = this.getHeading.bind(this);
+        // this.getHeading = this.getHeading.bind(this);
         this.heading = 0;
+        // this.headingUpdateThrottle = 50; // Minimum gap between heading updates in milliseconds
+        // this.lastHeadingUpdate = 0;
         this.lastRotationAngle = 0; // Tracks the actual rotation angle applied
-        this.headingUpdateThrottle = 50; // Minimum gap between heading updates in milliseconds
-        this.lastHeadingUpdate = 0;
         this.pendingHeadingUpdate = null; // Track pending animation frame callback
         this.pendingHeading = null; // Store pending heading value
         this.lastHeadingFilterTime = 0; // Track when a heading jump was last filtered
+
+        this.headingTracker = new HeadingTracker(h => this.setHeading(h), 50);
     }
 
     supportLogger(name,message) {
@@ -47,47 +50,7 @@ export class DeviceManager {
     }
 
     startOrientationTracking() {
-        // Call requestPermission if it exists (works on both iOS 13+ and Chrome 151+)
-        if (typeof DeviceOrientationEvent !== 'undefined' &&
-            typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission()
-                .then(response => {
-                    if (response === 'granted') this._attachListeners();
-                })
-                .catch(console.error);
-        } else {
-            this._attachListeners();
-        }
-    }
-
-    _attachListeners() {
-        // Listen to BOTH events — use whichever fires with absolute data
-        window.addEventListener('deviceorientationabsolute', this.getHeading);
-        window.addEventListener('deviceorientation', this.getHeading);
-    }
-
-    getHeading(event) {
-        const now = performance.now();
-
-        // throttle heading
-        if (now - this.lastHeadingUpdate < this.headingUpdateThrottle) return;
-        this.lastHeadingUpdate = now;
-
-        let heading = null;
-
-        // iOS: webkitCompassHeading is always present and is the true compass bearing
-        if (event.webkitCompassHeading != null) {
-            heading = event.webkitCompassHeading;
-        }
-        // Android/Chromium: only trust the event if it's actually absolute
-        else if (event.absolute && event.alpha != null) {
-            heading = (360 - event.alpha) % 360;
-        }
-        // Relative event (event.absolute === false) → ignore it
-
-        if (heading !== null) {
-            setHeading(heading);
-        }
+        this.headingTracker.start();
     }
 
     setHeading(heading) {
