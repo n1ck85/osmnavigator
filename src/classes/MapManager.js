@@ -66,10 +66,9 @@ export class MapManager {
         // Create a MapTiler vector layer inside Leaflet
         const vectorLayer = new MaptilerLayer({
             style: this.mapStyle,
-            apiKey: this.mapTilerApiKey,            
+            apiKey: this.mapTilerApiKey,
         }).addTo(this.map);
-        
-        // Now this works:
+
         this.map.attributionControl._attributions = {};  // internal reset
         this.map.attributionControl.addAttribution(
             `<a href="https://www.maptiler.com">
@@ -78,7 +77,6 @@ export class MapManager {
                 <br>
                 © OpenStreetMap contributors`
         );
-
 
         //remove maplibre attribution control
         const attribControl = vectorLayer._maptilerMap._controls.find(

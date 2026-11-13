@@ -46,20 +46,24 @@ export class DeviceManager {
         }
     }
 
-
     startOrientationTracking() {
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            // iOS 13+ Safari requires this call
+        // Call requestPermission if it exists (works on both iOS 13+ and Chrome 151+)
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
             DeviceOrientationEvent.requestPermission()
                 .then(response => {
-                    if (response === 'granted') {
-                        window.addEventListener('deviceorientation', this.getHeading);
-                    }
-                }).catch(console.error);
-        } else if ('ondeviceorientationabsolute' in window) {
-            // Non-iOS 13+ or desktop: events fire automatically
-            window.addEventListener('deviceorientationabsolute', this.getHeading);
+                    if (response === 'granted') this._attachListeners();
+                })
+                .catch(console.error);
+        } else {
+            this._attachListeners();
         }
+    }
+
+    _attachListeners() {
+        // Listen to BOTH events — use whichever fires with absolute data
+        window.addEventListener('deviceorientationabsolute', this.getHeading);
+        window.addEventListener('deviceorientation', this.getHeading);
     }
 
     getHeading(event) {
