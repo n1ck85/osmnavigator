@@ -1,21 +1,49 @@
-function compassHeading(alpha, beta, gamma) {
+// function compassHeading(alpha, beta, gamma) {
+//     const d = Math.PI / 180;
+//     const a = alpha * d, b = beta * d, g = gamma * d;
+//     const cA = Math.cos(a), sA = Math.sin(a);
+//     const cB = Math.cos(b), sB = Math.sin(b);
+//     const cG = Math.cos(g), sG = Math.sin(g);
+
+//     let east, north;
+//     if (beta < 0 || cB * cG > 0.7) {
+//         // Top edge tipped down, or phone roughly flat:
+//         // use the direction the top edge of the phone points
+//         east = -sA * cB;
+//         north = cA * cB;
+//     } else {
+//         // Held upright: use the direction the back of the phone faces
+//         east = -cA * sG - sA * sB * cG;
+//         north = -sA * sG + cA * sB * cG;
+//     }
+
+//     return (Math.atan2(east, north) / d + 360) % 360;
+// }
+
+function compassHeading(alpha, beta, gamma, screenAngle = 0) {
     const d = Math.PI / 180;
     const a = alpha * d, b = beta * d, g = gamma * d;
     const cA = Math.cos(a), sA = Math.sin(a);
     const cB = Math.cos(b), sB = Math.sin(b);
     const cG = Math.cos(g), sG = Math.sin(g);
 
-    let east, north;
-    if (beta < 0 || cB * cG > 0.7) {
-        // Top edge tipped down, or phone roughly flat:
-        // use the direction the top edge of the phone points
-        east = -sA * cB;
-        north = cA * cB;
-    } else {
-        // Held upright: use the direction the back of the phone faces
-        east = -cA * sG - sA * sB * cG;
-        north = -sA * sG + cA * sB * cG;
-    }
+    // Device axes in world coordinates (east, north, up)
+    const X = [cA * cG - sA * sB * sG,  sA * cG + cA * sB * sG, -cB * sG];
+    const Y = [-sA * cB, cA * cB, sB];
+    const Z = [cA * sG + sA * sB * cG,  sA * sG - cA * sB * cG,  cB * cG];
+
+    // Which device edge is the top of the screen right now?
+    const angle = ((Math.round(screenAngle / 90) * 90) % 360 + 360) % 360;
+    const up = angle === 0 ? Y
+             : angle === 90 ? X
+             : angle === 180 ? Y.map(v => -v)
+             : X.map(v => -v);
+
+    // Screen faces up (or top edge tipped down): use screen-up direction.
+    // Held upright: use the direction the back of the phone faces.
+    const useScreenUp = up[2] < 0 || Z[2] > 0.7;
+    const east  = useScreenUp ? up[0] : -Z[0];
+    const north = useScreenUp ? up[1] : -Z[1];
 
     return (Math.atan2(east, north) / d + 360) % 360;
 }
