@@ -101,7 +101,8 @@ export class HeadingTracker {
             heading = event.webkitCompassHeading; // iOS
         } else if (event.absolute && event.alpha != null &&
                    event.beta != null && event.gamma != null) {
-            heading = compassHeading(event.alpha, event.beta, event.gamma);
+            const screenAngle = window.screen.orientation?.angle ?? window.orientation ?? 0;
+            heading = compassHeading(event.alpha, event.beta, event.gamma, screenAngle);
         }
 
         if (heading !== null && !isNaN(heading)) {

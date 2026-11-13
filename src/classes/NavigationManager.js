@@ -19,8 +19,8 @@ export class NavigationManager {
         this.maxShortUTurnDistance = 100; // Maximum distance in meters to consider a U-turn as a short loop to be ignored
         this.cumulativeDistances = null;
         this.turns = null;
-        this.turnStateEarlyDistance = 80; // Distance in meters to give early turn alert
-        this.turnStateNearDistance = 40; // Distance in meters to give near turn alert
+        this.turnStateEarlyDistance = 100; // Distance in meters to give early turn alert
+        this.turnStateNearDistance = 50; // Distance in meters to give near turn alert
         this.turnStateNowDistance = 10; // Distance in meters to give now turn alert
         this.turnDistanceBuffer = 0; // Buffer distance in meters to offset turn alerts for different speeds or travel
         this.turnState = {
@@ -199,6 +199,12 @@ export class NavigationManager {
         return this.turns?.find(t => t.distanceFromStart > distanceAlongRoute) || null;
     }
 
+    /**
+     * Calculates the great-circle distance between two geographic coordinates using the Haversine formula.
+     * @param {{lat: number, lng: number}} a - The first point with latitude and longitude.
+     * @param {{lat: number, lng: number}} b - The second point with latitude and longitude.
+     * @returns {number} The distance between the two points in meters.
+     */
     distance(a, b) {
         const R = 6371000;
         const toRad = d => d * Math.PI / 180;
@@ -209,6 +215,7 @@ export class NavigationManager {
         const lat1 = toRad(a.lat);
         const lat2 = toRad(b.lat);
 
+        // Haversine formula to calculate the great-circle distance between two points
         const h = Math.sin(dLat / 2) ** 2 +
                   Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
 
@@ -383,19 +390,19 @@ export class NavigationManager {
         const nextTurnIcon = nextTurn.type.replace(" ", "-").replace("slight", "up-").replace("sharp", "down-");
 
         if (distToTurn < (this.turnDistanceBuffer + this.turnStateEarlyDistance) && !this.turnState.early) {
-            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square-fill text-warning"></i></div><div><span>In ${Math.round(distToTurn)} meters, ${nextTurn.type}</span></div>`, 5000);
-            this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square-fill text-warning"></i></div><div><span>In ${Math.round(distToTurn)} meters, ${nextTurn.type}</span></div>`, 3500);
+            this.speechManager.speak(`Next turn ${nextTurn.type}`);
             this.turnState.early = true;
         }
 
         if (distToTurn < (this.turnDistanceBuffer + this.turnStateNearDistance) && !this.turnState.near) {
-            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square-fill text-warning"></i></div><div><span>In ${Math.round(distToTurn)} meters, ${nextTurn.type}</span></div>`, 5000);
-            this.speechManager.speak(`In ${Math.round(distToTurn)} meters, ${nextTurn.type}`);
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square-fill text-warning"></i></div><div><span>In ${Math.round(distToTurn)} meters, ${nextTurn.type}</span></div>`, 3500);
+            this.speechManager.speak(`Upcoming ${nextTurn.type} turn`);
             this.turnState.near = true;
         }
 
         if (distToTurn < (this.turnDistanceBuffer + this.turnStateNowDistance) && !this.turnState.now) {
-            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square-fill text-warning"></i></div><div><span>Now ${nextTurn.type}</span></div>`, 5000);
+            this.mapManager.createInfoBox('navigation-update', 'topright', `<div><i class="bi bi-arrow-${nextTurnIcon}-square-fill text-warning"></i></div><div><span>Now ${nextTurn.type}</span></div>`, 3500);
             this.speechManager.speak(`Now ${nextTurn.type}`);
             this.turnState.now = true;
         }
@@ -403,7 +410,7 @@ export class NavigationManager {
 
     offRouteDetection() {
         const { distanceMeters } = this.mapManager.getClosestPointOnPolyline(this.lastKnownLocation);
-        const threshold = this.trackThreshold + (this.lastKnownAccuracy / 2);
+        const threshold = this.trackThreshold;// + (this.lastKnownAccuracy / 2);
 
         if (distanceMeters > threshold)
             return distanceMeters;
