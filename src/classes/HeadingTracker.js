@@ -1,16 +1,23 @@
 function compassHeading(alpha, beta, gamma) {
     const d = Math.PI / 180;
     const a = alpha * d, b = beta * d, g = gamma * d;
-    const rA = -Math.cos(a) * Math.sin(g) - Math.sin(a) * Math.sin(b) * Math.cos(g);
-    const rB = -Math.sin(a) * Math.sin(g) + Math.cos(a) * Math.sin(b) * Math.cos(g);
+    const cA = Math.cos(a), sA = Math.sin(a);
+    const cB = Math.cos(b), sB = Math.sin(b);
+    const cG = Math.cos(g), sG = Math.sin(g);
 
-    // Phone lying flat: formula breaks down, use alpha directly
-    if (Math.hypot(rA, rB) < 0.1) return (360 - alpha) % 360;
+    let east, north;
+    if (beta < 0 || cB * cG > 0.7) {
+        // Top edge tipped down, or phone roughly flat:
+        // use the direction the top edge of the phone points
+        east = -sA * cB;
+        north = cA * cB;
+    } else {
+        // Held upright: use the direction the back of the phone faces
+        east = -cA * sG - sA * sB * cG;
+        north = -sA * sG + cA * sB * cG;
+    }
 
-    let h = Math.atan(rA / rB);
-    if (rB < 0) h += Math.PI;
-    else if (rA < 0) h += 2 * Math.PI;
-    return h / d;
+    return (Math.atan2(east, north) / d + 360) % 360;
 }
 
 export class HeadingTracker {
