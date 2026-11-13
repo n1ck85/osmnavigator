@@ -55,22 +55,36 @@ export class MapManager {
     }
 
     initializeMap() {
-        this.map = L.map(this.containerId).setView([0, 0], 17);
-
-        // Create a MapTiler vector layer inside Leaflet
-        const layer = new MaptilerLayer({
-            style: this.mapStyle,
-            apiKey: this.mapTilerApiKey,
+        this.map = L.map(this.containerId, {
             maxZoom: 19,
             maxNativeZoom: 16,
-            minZoom: 6,
+            minZoom: 3,
+            //prefix: false,
+            //attributionControl: false,
+        }).setView([0, 0], 17);
+
+        // Create a MapTiler vector layer inside Leaflet
+        const vectorLayer = new MaptilerLayer({
+            style: this.mapStyle,
+            apiKey: this.mapTilerApiKey,            
         }).addTo(this.map);
+        
+        // Now this works:
+        this.map.attributionControl._attributions = {};  // internal reset
+        this.map.attributionControl.addAttribution(
+            `<a href="https://www.maptiler.com">
+                <img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo">
+                </a>
+                <br>
+                © OpenStreetMap contributors`
+        );
+
 
         //remove maplibre attribution control
-        const attribControl = layer._maptilerMap._controls.find(
+        const attribControl = vectorLayer._maptilerMap._controls.find(
             c => c._container?.classList?.contains('maplibregl-ctrl-attrib')
         );
-        attribControl && layer._maptilerMap.removeControl(attribControl);
+        attribControl && vectorLayer._maptilerMap.removeControl(attribControl);
     }
 
     createUserMarker(latlng) {
